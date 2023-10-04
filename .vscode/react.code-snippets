@@ -1,0 +1,37 @@
+{
+  "react component": {
+    "scope": "typescript, typescriptreact",
+    "prefix": "imrcc",
+    "body": [
+      "import { FC } from 'react';",
+      "import classes from './${TM_FILENAME_BASE}.module.scss';",
+      "",
+      "interface ${TM_FILENAME_BASE}Props {",
+      "\tclassName?: string;",
+      "}",
+      "",
+      "export const ${TM_FILENAME_BASE}: FC<${TM_FILENAME_BASE}Props> = ({className}) => {",
+      "",
+      " return (",
+      "\t<div className={classes.${TM_FILENAME_BASE}}> </div>",
+      " );",
+      "}"
+    ],
+    "description": "Создать React-компонент по умолчанию. Импортируется scss-модуль и функция для работы с классами classnames."
+  },
+  "react test": {
+    "scope": "typescript, typescriptreact",
+    "prefix": "imrttt",
+    "body": [
+      "import { ${TM_FILENAME_BASE/(.test|.spec)//gi} } from './${TM_FILENAME_BASE/(.test|.spec)//gi}'",
+      "import { render, screen } from '@testing-library/react'",
+      "",
+      "describe('${TM_FILENAME_BASE/(.test|.spec)//gi}-test', () => {",
+      "  test('', () => {",
+      "    ",
+      "  })",
+      "})",
+    ],
+    "description": "Создать тест для компонента"
+  }
+}

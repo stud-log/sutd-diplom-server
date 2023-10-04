@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "target": "es5", /* Используйте "es5" или "es2015" для совместимости с более старыми версиями Node.js. */
+    "module": "commonjs",
+    "rootDir": "./src",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true
+  },
+  "exclude": [
+    "webpack.config.ts"
+  ]
+}
