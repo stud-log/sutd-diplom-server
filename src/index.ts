@@ -1,5 +1,7 @@
-import express from 'express';
 import cors from 'cors';
+import { errorHandler } from './middleware/error-handling.middleware';
+import express from 'express';
+import path from 'path';
 import { router } from './routes';
 
 const app = express();
@@ -17,8 +19,10 @@ app.use(
   }),
 );
 app.use(express.json());
+app.use('/static', express.static(path.join(__dirname , '/static')));
 app.use('/api', router);
-
+app.use(errorHandler);
+//TODO: add cookie parser
 
 app.listen(PORT, () => {
   console.log(`Сервер запущен на порту ${PORT}`);
