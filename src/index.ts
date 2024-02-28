@@ -5,7 +5,7 @@ import path from 'path';
 import { router } from './routes';
 
 const app = express();
-const PORT = 9900
+const PORT = 9900;
 
 app.use(
   cors({
