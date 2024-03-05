@@ -1,7 +1,9 @@
 {
-  "i18n-ally.localesPaths": ["public/locales", "src/shared/config/i18n"],
+  "i18n-ally.localesPaths": [
+    "public/locales",
+    "src/shared/config/i18n"
+  ],
   "i18n-ally.sourceLanguage": "en",
-  
   "[scss]": {
     "editor.defaultFormatter": "stylelint.vscode-stylelint"
   },
@@ -10,10 +12,17 @@
   "less.validate": false,
   "scss.validate": false,
   "stylelint.enable": true,
-  "stylelint.validate": ["css", "scss"],
+  "stylelint.validate": [
+    "css",
+    "scss"
+  ],
   "files.autoSaveDelay": 900,
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit",
     "source.fixAll.stylelint": "explicit"
   },
+  "cSpell.words": [
+    "Weekparities",
+    "weekparity"
+  ],
 }

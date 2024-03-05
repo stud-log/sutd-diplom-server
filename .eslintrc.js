@@ -51,7 +51,7 @@ module.exports = {
       }
     ],
     "@stylistic/member-delimiter-style": [ 'error' ],
-    "@stylistic/js/no-multiple-empty-lines": [ 'error', { max: 1 } ]
-    
+    "@stylistic/js/no-multiple-empty-lines": [ 'error', { max: 1 } ],
+    "@typescript-eslint/no-explicit-any": [ 1 ]
   }
 };
