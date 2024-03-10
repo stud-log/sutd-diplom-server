@@ -1,7 +1,6 @@
 import { AfterCreate, BelongsTo, Column, DataType, ForeignKey, Model, Table } from 'sequelize-typescript';
 
 import { Record } from './records.model';
-import { UserComment } from './user-comments.model';
 
 export enum HomeworkType {
   individual = 'individual',
@@ -12,7 +11,7 @@ interface HomeworkAttrs {
   id?: number;
   title: string;
   content: string;
-  deadline: Date;
+  deadline: string;
   type: HomeworkType;
 }
 
@@ -27,7 +26,7 @@ export class Homework extends Model<Homework, HomeworkAttrs> {
   @Column({ allowNull: false, type: DataType.TEXT })
     content: string;
 
-  @Column({ allowNull: false, type: DataType.DATE })
+  @Column({ allowNull: false })
     deadline: string;
 
   @Column({ allowNull: false })

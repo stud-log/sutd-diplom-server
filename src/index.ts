@@ -3,14 +3,14 @@ import { errorHandler } from './middleware/error-handling.middleware';
 import express from 'express';
 import path from 'path';
 import { router } from './routes';
+import { sequelize } from './db';
 
 const app = express();
-const PORT = 9900;
 
 app.use(
   cors({
     origin: [
-      'http://localhost:3000',
+      process.env.FRONTEND_URL as string,
       '*'
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
@@ -24,6 +24,17 @@ app.use('/api', router);
 app.use(errorHandler);
 //TODO: add cookie parser
 
-app.listen(PORT, () => {
-  console.log(`Сервер запущен на порту ${PORT}`);
-});
+const PORT = process.env.PORT;
+const start = async () => {
+  try {
+    await sequelize.authenticate();
+    await sequelize.sync(/*{alter: true}*/);
+    app.listen(PORT, async () => {
+      console.log(`Server started on port ${PORT}`);
+    });
+  } catch (e) {
+    console.log(e);
+  }
+};
+
+start();

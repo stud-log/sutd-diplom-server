@@ -1,7 +1,14 @@
 import { BelongsTo, BelongsToMany, Column, DataType, ForeignKey, HasMany, HasOne, Model, Table } from 'sequelize-typescript';
 
 import { Group } from './group.model';
+import { UserAchievement } from './user-achievements.model';
+import { UserAttendance } from './user-attendance.model';
+import { UserComment } from './user-comments.model';
+import { UserFavorite } from './user-favorites.model';
+import { UserNotification } from './user-notifications.model';
 import { UserRole } from './user-roles.model';
+import { UserTask } from './user-tasks.model';
+import { UserTeam } from './user-teams.model';
 
 export enum UserStatus {
   inReview = 'inReview',
@@ -39,6 +46,27 @@ export class User extends Model<User, UserAttrs> {
 
   @BelongsTo(() => Group)
     group: Group;
+
+  @HasMany(() => UserComment)
+    comments: UserComment[];
+  
+  @HasMany(() => UserAttendance)
+    attendances: UserAttendance[];
+
+  @HasMany(() => UserFavorite)
+    favorites: UserFavorite[];
+
+  @HasMany(() => UserNotification)
+    notifications: UserNotification[];
+
+  @HasMany(() => UserTask)
+    tasks: UserTask[];
+
+  @HasMany(() => UserTeam)
+    teams: UserTeam[];
+
+  @HasMany(() => UserAchievement)
+    achievements: UserAchievement[];
 
   @Column({ allowNull: false })
     firstName: string;

@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es5", /* Используйте "es5" или "es2015" для совместимости с более старыми версиями Node.js. */
+    "target": "es6",
     "module": "commonjs",
     "rootDir": "./src",
     "sourceMap": true,
@@ -10,6 +10,8 @@
     "strict": true,
     "skipLibCheck": true,
     "strictPropertyInitialization": false,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
   },
   "exclude": [
     "webpack.config.ts"

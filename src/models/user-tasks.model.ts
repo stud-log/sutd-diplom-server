@@ -3,7 +3,7 @@ import { BelongsTo, Column, DataType, ForeignKey, HasMany, HasOne, Model, Table 
 import { Record } from './records.model';
 import { User } from './user.model';
 
-export enum UserTaskType {
+export enum UserTaskStatus {
   inProgress = 'inProgress',
   feedback = 'feedback',
   passed = 'passed',
@@ -13,11 +13,11 @@ interface UserTaskAttrs {
   id?: number;
   userId?: number;
   recordId?: number;
-  status: UserTaskType;
+  status: UserTaskStatus;
   title: string;
   description?: string;
   trackedTime?: number;
-  doneDate: Date;
+  doneDate: string;
 }
 
 /**
@@ -63,7 +63,7 @@ export class UserTask extends Model<UserTask, UserTaskAttrs> {
   @Column({ allowNull: false })
     status: string;
 
-  @Column({ allowNull: false, type: DataType.DATE })
-    doneDate: Date;
+  @Column({ allowNull: false })
+    doneDate: string;
 
 }

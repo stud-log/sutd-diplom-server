@@ -10,8 +10,8 @@ interface CustomActivityAttrs {
   groupId: number;
   title: string;
   description?: string;
-  startDate: Date;
-  endDate: Date;
+  startDate: string;
+  endDate: string;
 }
 
 @Table({ tableName: 'CustomActivities' })
@@ -39,11 +39,11 @@ export class CustomActivity extends Model<CustomActivity, CustomActivityAttrs> {
   @Column({ type: DataType.TEXT, allowNull: true })
     description: string;
 
-  @Column({ allowNull: false, type: DataType.DATE })
-    startDate: Date;
+  @Column({ allowNull: false })
+    startDate: string;
 
-  @Column({ allowNull: false, type: DataType.DATE })
-    endDate: Date;
+  @Column({ allowNull: false })
+    endDate: string;
 
   @AfterCreate({})
   static async createCalendar(instance: CustomActivity) {

@@ -2,6 +2,13 @@ import { BelongsTo, Column, DataType, ForeignKey, Model, Table } from 'sequelize
 
 import { UserRole } from './user-roles.model';
 
+interface RolePermissionAttrs {
+  id?: number;
+  canEdit: string;
+  canInvite: string;
+  roleId: number;
+}
+
 /**
  * Может показаться излишним, так как в нашем приложении всего две роли - "Студент" и "Староста".
  * Однако, за расширением приложения могут быть добавлены новые роли и новые разрешения.
@@ -9,7 +16,7 @@ import { UserRole } from './user-roles.model';
  * но сможет редактировать и добавлять посты.
  */
 @Table({ tableName: 'RolePermissions' })
-export class RolePermission extends Model<RolePermission> {
+export class RolePermission extends Model<RolePermission, RolePermissionAttrs> {
   @Column({ primaryKey: true, allowNull: false, autoIncrement: true, unique: true })
     id: number;
 
@@ -20,7 +27,7 @@ export class RolePermission extends Model<RolePermission> {
     canInvite: string;
 
   @ForeignKey(() => UserRole)
-  @Column({ allowNull: true })
+  @Column({ allowNull: false })
     roleId: number;
     
   @BelongsTo(() => UserRole)

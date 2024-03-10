@@ -11,8 +11,8 @@ interface CalendarAttrs {
   id?: number;
   activityId: number;
   activityType: CalendarActivityType;
-  startDate: Date;
-  endDate: Date;
+  startDate: string;
+  endDate: string;
 }
 
 /**
@@ -30,11 +30,11 @@ export class Calendar extends Model<Calendar, CalendarAttrs> {
   @Column({ allowNull: false })
     activityType: string;
     
-  @Column({ allowNull: false, type: DataType.DATE })
-    startDate: Date;
+  @Column({ allowNull: false })
+    startDate: string;
   
-  @Column({ allowNull: false, type: DataType.DATE })
-    endDate: Date;
+  @Column({ allowNull: false })
+    endDate: string;
     
   @AfterCreate({})
   static async createRecord(instance: Calendar) {

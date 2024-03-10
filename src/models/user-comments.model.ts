@@ -15,7 +15,7 @@ interface UserCommentAttrs {
 /**
  * Комментарии пользователей
  * * title - опциональное поле, для комментариев официального типа
- * * isNote - ?
+ * * isNote - если комментарий является заметкой для собственной задачи
  */
 @Table({ tableName: 'UserComments' })
 export class UserComment extends Model<UserComment, UserCommentAttrs> {
@@ -38,6 +38,13 @@ export class UserComment extends Model<UserComment, UserCommentAttrs> {
 
   @Column({ allowNull: true })
     parentId: number;
+
+  @BelongsTo(() => UserComment, {
+    as: 'parent',
+    foreignKey: 'parentId',
+    targetKey: 'id',
+  })
+    parent: UserComment;
 
   @Column({ allowNull: true })
     title: string;

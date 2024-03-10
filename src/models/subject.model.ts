@@ -1,6 +1,4 @@
-import { AfterCreate, BelongsTo, Column, DataType, ForeignKey, HasMany, Model, Table } from 'sequelize-typescript';
-
-import { Record } from './records.model';
+import { Column, Model, Table } from 'sequelize-typescript';
 
 interface SubjectAttrs {
   id?: number;
@@ -23,8 +21,4 @@ export class Subject extends Model<Subject, SubjectAttrs> {
   @Column({ allowNull: true })
     teacherName: string;
 
-  @AfterCreate({})
-  static async createRecord(instance: Subject) {
-    await Record.create({ recordTable: 'User', recordId: instance.id });
-  }
 }
