@@ -4,8 +4,8 @@ import { UserRole } from './user-roles.model';
 
 interface RolePermissionAttrs {
   id?: number;
-  canEdit: string;
-  canInvite: string;
+  canEdit: boolean;
+  canInvite: boolean;
   roleId: number;
 }
 
@@ -21,10 +21,10 @@ export class RolePermission extends Model<RolePermission, RolePermissionAttrs> {
     id: number;
 
   @Column({ allowNull: false })
-    canEdit: string;
+    canEdit: boolean;
 
   @Column({ allowNull: false })
-    canInvite: string;
+    canInvite: boolean;
 
   @ForeignKey(() => UserRole)
   @Column({ allowNull: false })

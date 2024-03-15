@@ -1,4 +1,5 @@
 import { Achievement } from './models/achievements.model';
+import { Admin } from './models/admin.model';
 import { Calendar, } from './models/calendar.model';
 import { CustomActivity } from './models/custom-activities.model';
 import { File } from './models/files.model';
@@ -35,6 +36,7 @@ export const sequelize = new Sequelize({
   host: process.env.DB_HOST,
   storage: ':memory:',
   models: [
+    Admin,
     Achievement,
     Calendar,
     CustomActivity,

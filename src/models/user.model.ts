@@ -22,6 +22,8 @@ interface UserAttrs {
   groupId?: number;
   firstName: string;
   lastName: string;
+  patronymic?: string; // отчество
+  email: string;
   password: string;
   phone: string;
   status: UserStatus;
@@ -73,6 +75,12 @@ export class User extends Model<User, UserAttrs> {
 
   @Column({ allowNull: false })
     lastName: string;
+
+  @Column({ allowNull: true })
+    patronymic: string;
+
+  @Column({ allowNull: false })
+    email: string;
 
   @Column({ allowNull: false })
     password: string;
