@@ -1,29 +1,33 @@
 import { body, param } from "express-validator";
 
 import { Router } from "express";
+import { adminMiddleware } from "../middleware/admin.middleware";
+import { authMiddleware } from "../middleware/auth.middleware";
 import userController from "../controllers/user.controller";
 import { validateRequestMiddleware } from "../middleware/validate-request.middleware";
 
 const userRouter = Router();
 
-userRouter.get('', userController.getAll);
+userRouter.get('', adminMiddleware(), userController.getAll);
+userRouter.get('/refresh', userController.refresh);
+userRouter.get('/me', authMiddleware(), userController.getMe);
 userRouter.get(
   '/:id',
   param('id').exists({ checkFalsy: true }),
   validateRequestMiddleware,
+  adminMiddleware(),
   userController.getOne
 );
-userRouter.get('/refresh', userController.refresh);
 
 userRouter.post(
-  '/registration',
+  '/reg',
   body('email').isEmail(),
   body('password').isLength({ min: 6 }),
   body('lastName').exists({ checkFalsy: true }),
-  body('patronymic').exists({ checkFalsy: false }),
+  body('patronymic'),
   body('group').exists({ checkFalsy: true }),
   body('phone').exists({ checkFalsy: true }),
-  body('role').exists({ checkFalsy: false }),
+  body('role'),
   validateRequestMiddleware,
   userController.registration
 );
@@ -35,5 +39,21 @@ userRouter.post(
   userController.login
 );
 userRouter.post('/logout', userController.logout);
+
+userRouter.post(
+  '/recovery',
+  body('email').exists({ checkFalsy: true }),
+  validateRequestMiddleware,
+  userController.passRecovery,
+);
+
+userRouter.post(
+  '/recovery/update',
+  body('recoveryId').exists({ checkFalsy: true }),
+  body('userId').exists({ checkFalsy: true }),
+  body('hash').exists({ checkFalsy: true }),
+  validateRequestMiddleware,
+  userController.passRecoveryUpdate,
+);
 
 export { userRouter };

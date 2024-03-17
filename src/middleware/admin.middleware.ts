@@ -3,11 +3,7 @@ import { NextFunction, Request, Response } from 'express';
 import tokenService, { TokenPayload } from '../services/token.service';
 
 import { ApiError } from '../shared/error/ApiError';
-
-interface IUserReq extends Request {
-  user: TokenPayload;
-  isAdmin?: boolean;
-}
+import { IUserReq } from '../shared/interfaces/req';
 
 export const adminMiddleware =
   (accessLevel?: AdminLevels) => async (req: Request, res: Response, next: NextFunction) => {

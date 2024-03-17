@@ -2,13 +2,9 @@ import { NextFunction, Request, Response } from 'express';
 import tokenService, { TokenPayload } from '../services/token.service';
 
 import { ApiError } from '../shared/error/ApiError';
+import { IUserReq } from '../shared/interfaces/req';
 import { RoleCreationDTO } from '@stud-log/news-types/dto';
 import { isEqual } from 'lodash';
-
-interface IUserReq extends Request {
-  user: TokenPayload;
-  isAdmin?: boolean;
-}
 
 export const authMiddleware = (neededPermission?: RoleCreationDTO['permissions']) => (req: Request, res: Response, next: NextFunction) => {
   if (req.method === 'OPTIONS') {

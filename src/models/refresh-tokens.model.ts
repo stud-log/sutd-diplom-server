@@ -20,6 +20,6 @@ export class RefreshToken extends Model<RefreshToken, RefreshTokenAttrs> {
   @BelongsTo(() => User)
     user: User;
 
-  @Column({ allowNull: false })
+  @Column({ allowNull: false, type: DataType.TEXT })
     refreshToken: string;
 }
