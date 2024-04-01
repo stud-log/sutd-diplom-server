@@ -4,10 +4,10 @@ import { Group } from './group.model';
 import { Subject } from './subject.model';
 
 export enum TimetableTypes {
-  practice = 'practice',
-  lecture = 'lecture',
-  exam = 'exam',
-  test = 'test',
+  practice = 'Пр',
+  lecture = 'Лек',
+  both = 'Лек, Пр',
+  lab = 'Лаб'
 }
 
 export enum TimetableWeekdays {
@@ -26,7 +26,7 @@ export enum TimetableWeekparities {
   both = 'both',
 }
 
-interface TimetableAttrs {
+export interface TimetableAttrs {
   id?: number;
   groupId: number;
   subjectId: number;
@@ -34,6 +34,7 @@ interface TimetableAttrs {
   weekday: TimetableWeekdays;
   weekparity: TimetableWeekparities;
   startTime: string;
+  endTime: string;
   classroom?: string;
   link?: string;
 }
@@ -77,10 +78,13 @@ export class Timetable extends Model<Timetable, TimetableAttrs> {
     weekday: string;
 
   @Column({ values: Object.values(TimetableWeekparities), allowNull: false })
-    weekparity: number;
+    weekparity: string;
 
   @Column({ allowNull: false })
     startTime: string;
+  
+  @Column({ allowNull: false })
+    endTime: string;
 
   @Column({ allowNull: true })
     classroom: string;

@@ -3,12 +3,12 @@ import { User, UserStatus } from "../models/user.model";
 
 import { ApiError } from '../shared/error/ApiError';
 import { Group } from '../models/group.model';
-import { GroupService } from "./group.service";
 import { RolePermission } from "../models/role-permissions.model";
 import { RoleService } from './role.service';
 import { TemporaryLink } from '../models/tmp-links.model';
 import { UserRole } from "../models/user-roles.model";
 import bcrypt from 'bcryptjs';
+import groupService from "./group.service";
 import { mailRecoveryTemplate } from '../shared/templates/mail/recovery.template';
 import mailService from './mail.service';
 import recoveryService from './recovery.service';
@@ -16,7 +16,6 @@ import tokenService from './token.service';
 
 class UserService {
   private roleService = new RoleService();
-  private groupService = new GroupService();
 
   async getAll() {
     return await User.findAll();
@@ -40,7 +39,7 @@ class UserService {
 
     const hashedPassword = await bcrypt.hash(regDto.password.trim(), 5);
     const role = regDto.role == 'mentor' ? await this.roleService.getMentorRole() : await this.roleService.getStudentRole();
-    const group = await this.groupService.getByName(regDto.group);
+    const group = await groupService.getByName(regDto.group);
     
     if(!role) throw "Такой роли не существует"; // must have not to be here
     if(!group) throw "Такой группы не существует"; // must have not to be here
