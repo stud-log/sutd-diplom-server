@@ -1,6 +1,8 @@
 import { AfterCreate, BelongsTo, Column, DataType, ForeignKey, Model, Table } from 'sequelize-typescript';
 
 import { Record } from './records.model';
+import { Subject } from './subject.model';
+import { User } from './user.model';
 
 export enum HomeworkType {
   individual = 'individual',
@@ -9,9 +11,12 @@ export enum HomeworkType {
 
 interface HomeworkAttrs {
   id?: number;
+  authorId?: number;
   title: string;
   content: string;
-  deadline: string;
+  startDate: string;
+  subjectId: number;
+  endDate: string;
   type: HomeworkType;
 }
 
@@ -19,6 +24,20 @@ interface HomeworkAttrs {
 export class Homework extends Model<Homework, HomeworkAttrs> {
   @Column({ primaryKey: true, allowNull: false, autoIncrement: true, unique: true })
     id: number;
+
+  @ForeignKey(() => Subject)
+  @Column({ allowNull: false })
+    subjectId: number;
+
+  @BelongsTo(() => Subject)
+    subject: Subject;
+
+  @ForeignKey(() => User)
+  @Column({ allowNull: true })
+    authorId: number;
+  
+  @BelongsTo(() => User)
+    author: User;
     
   @Column({ allowNull: false })
     title: string;
@@ -27,7 +46,10 @@ export class Homework extends Model<Homework, HomeworkAttrs> {
     content: string;
 
   @Column({ allowNull: false })
-    deadline: string;
+    startDate: string;
+
+  @Column({ allowNull: false })
+    endDate: string;
 
   @Column({ allowNull: false })
     type: string;

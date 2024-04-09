@@ -6,7 +6,7 @@ interface RecordAttrs {
 
 }
 
-@Table({ tableName: 'Records', createdAt: false, updatedAt: false })
+@Table({ tableName: 'Records' })
 export class Record extends Model<Record, RecordAttrs> {
   @Column({ primaryKey: true, allowNull: false, autoIncrement: true, unique: true })
     id: number;

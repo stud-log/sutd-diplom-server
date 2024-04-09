@@ -14,22 +14,22 @@ interface UserTaskAttrs {
   userId?: number;
   recordId?: number;
   status: UserTaskStatus;
-  title: string;
+  title?: string;
   description?: string;
   trackedTime?: number;
-  doneDate: string;
+  doneDate?: string;
 }
 
 /**
- * Может относиться как к записи (задаче), так и к пользователю
+ * -Может относиться как к записи (задаче), так и к пользователю
  * при создании должен быть указан либо пользователь либо запись
- * Здесь находятся пользовательские задачи - домашние задания  + кастомные задачи
+ * -Здесь находятся пользовательские задачи - домашние задания  + кастомные задачи
  * (кастомные задания могут быть в рамках треда - задач, на которые группа разбивает
  * задание, или в рамках собственных, индивидуальных) , которые пользователь начал\закончил выполнять.
- * status in ['inProgress', 'feedback', 'passed'] (в процессе, ожидает фидбека, сдано)
- * trackedTime (in ms) - время, потраченное на задачу (может отсутствовать, тогда будет взято время в промежутке от createdAt до doneAt)
- * userId, при указанном recordId имеет смысл "исполнитель задачи"
- * описание может быть не заполнено
+ * -status in ['inProgress', 'feedback', 'passed'] (в процессе, ожидает фидбека, сдано)
+ * -trackedTime (in ms) - время, потраченное на задачу (может отсутствовать, тогда будет взято время в промежутке от createdAt до doneAt)
+ * -userId, при указанном recordId имеет смысл "исполнитель задачи"
+ * -описание может быть не заполнено
  *
  */
 @Table({ tableName: 'UserTasks' })
@@ -51,7 +51,7 @@ export class UserTask extends Model<UserTask, UserTaskAttrs> {
   @BelongsTo(() => Record)
     record: Record;
 
-  @Column({ allowNull: false })
+  @Column({ allowNull: true })
     title: string;
 
   @Column({ allowNull: true })
@@ -63,7 +63,7 @@ export class UserTask extends Model<UserTask, UserTaskAttrs> {
   @Column({ allowNull: false })
     status: string;
 
-  @Column({ allowNull: false })
+  @Column({ allowNull: true })
     doneDate: string;
 
 }

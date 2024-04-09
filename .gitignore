@@ -2,11 +2,15 @@ node_modules
 dist
 .npmrc
 
-/static/**/*.jpg
-/static/**/*.jpeg
-/static/**/*.png
-/static/**/*.webp
-/static/**/*.svg
-/static/**/*.gif
-/static/**/*.xlsx
-/static/**/*.csv
+src/static/**/*.jpg
+src/static/**/*.jpeg
+src/static/**/*.png
+src/static/**/*.webp
+src/static/**/*.doc
+src/static/**/*.pdf
+src/static/**/*.7z
+src/static/**/*.docx
+src/static/**/*.svg
+src/static/**/*.gif
+src/static/**/*.xlsx
+src/static/**/*.csv

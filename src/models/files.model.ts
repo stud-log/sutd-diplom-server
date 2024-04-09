@@ -5,7 +5,7 @@ import { Record } from './records.model';
 interface FileAttrs {
   recordId: number;
   url: string;
-  fileType: string;
+  fileName: string;
   fileSize?: number;
 }
 
@@ -14,7 +14,7 @@ interface FileAttrs {
  * fileSize in bytes
  */
 @Table({ tableName: 'Files' })
-export class File extends Model<File, FileAttrs> {
+export class AppFiles extends Model<AppFiles, FileAttrs> {
   @Column({ primaryKey: true, allowNull: false, autoIncrement: true, unique: true })
     id: number;
 
@@ -28,8 +28,8 @@ export class File extends Model<File, FileAttrs> {
   @Column({ allowNull: false, type: DataType.TEXT })
     url: string;
 
-  @Column({ allowNull: false })
-    fileType: string;
+  @Column({ allowNull: false, type: DataType.TEXT })
+    fileName: string;
 
   @Column({ allowNull: true })
     fileSize: number;

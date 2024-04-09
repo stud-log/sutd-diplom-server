@@ -43,7 +43,7 @@ const createDefaultRecords = async () => {
 const start = async () => {
   try {
     await sequelize.authenticate();
-    const alter = false;
+    const alter = true;
     await sequelize.sync({ alter });
     await createDefaultRecords();
     app.listen(PORT, async () => {

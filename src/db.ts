@@ -1,8 +1,8 @@
 import { Achievement } from './models/achievements.model';
 import { Admin } from './models/admin.model';
+import { AppFiles } from './models/files.model';
 import { Calendar, } from './models/calendar.model';
 import { CustomActivity } from './models/custom-activities.model';
-import { File } from './models/files.model';
 import { Group } from './models/group.model';
 import { Homework, } from './models/homeworks.model';
 import { Log } from './models/logs.model';
@@ -40,7 +40,7 @@ export const sequelize = new Sequelize({
     Achievement,
     Calendar,
     CustomActivity,
-    File,
+    AppFiles,
     Group,
     Homework,
     Log,

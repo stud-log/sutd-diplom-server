@@ -6,7 +6,7 @@ import { IUserReq } from '../shared/interfaces/req';
 import { RoleCreationDTO } from '@stud-log/news-types/dto';
 import { isEqual } from 'lodash';
 
-export const authMiddleware = (neededPermission?: RoleCreationDTO['permissions']) => (req: Request, res: Response, next: NextFunction) => {
+export const authMiddleware = (neededPermission?: Partial<RoleCreationDTO['permissions']>) => (req: Request, res: Response, next: NextFunction) => {
   if (req.method === 'OPTIONS') {
     return next();
   }
@@ -23,7 +23,13 @@ export const authMiddleware = (neededPermission?: RoleCreationDTO['permissions']
     }
 
     if (neededPermission) {
-      if (!isEqual(userData.permissions, neededPermission) ) {
+      let flag = 1;
+      for(const key of Object.keys(neededPermission)) {
+        if(userData.permissions[key as keyof typeof userData.permissions] != neededPermission[key as keyof typeof neededPermission]) {
+          flag = 0;
+        }
+      }
+      if(!flag) {
         return next(ApiError.forbidden('У вас нет требуемых разрешений'));
       }
     }
