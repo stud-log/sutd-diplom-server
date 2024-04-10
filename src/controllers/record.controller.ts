@@ -11,7 +11,7 @@ class RecordController {
     if(recordId && recordTable) {
       if(!isNaN(Number(recordId)))
         return await recordService
-          .getPost(recordTable, Number(recordId), (req as IUserReq).user.id)
+          .getPost(recordTable, Number(recordId), (req as IUserReq).user.id, (req as IUserReq).user.groupId)
           .then(post => res.json(post))
           .catch(err => next(ApiError.badRequest(err)));
     }
@@ -25,7 +25,7 @@ class RecordController {
     const { page, limit } = req.query;
     if(recordTable && !!page && !!limit) {
       return await recordService
-        .getAllPosts(recordTable, Number(page), Number(limit), (req as IUserReq).user.id)
+        .getAllPosts(recordTable, Number(page), Number(limit), (req as IUserReq).user.id, (req as IUserReq).user.groupId)
         .then(post => res.json(post))
         .catch(err => next(ApiError.badRequest(err)));
     }

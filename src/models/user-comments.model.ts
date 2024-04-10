@@ -1,5 +1,6 @@
 import { AfterCreate, BelongsTo, Column, DataType, ForeignKey, HasMany, HasOne, Model, Table } from 'sequelize-typescript';
 
+import { Group } from './group.model';
 import { Record } from './records.model';
 import { User } from './user.model';
 
@@ -7,6 +8,7 @@ interface UserCommentAttrs {
   id?: number;
   userId: number;
   recordId: number;
+  groupId: number;
   parentId?: number;
   title?: string;
   content: string;
@@ -28,6 +30,13 @@ export class UserComment extends Model<UserComment, UserCommentAttrs> {
   
   @BelongsTo(() => User)
     user: User;
+
+  @ForeignKey(() => Group)
+  @Column({ allowNull: false })
+    groupId: number;
+
+  @BelongsTo(() => Group)
+    group: Group;
 
   @ForeignKey(() => Record)
   @Column({ allowNull: false })
@@ -57,6 +66,6 @@ export class UserComment extends Model<UserComment, UserCommentAttrs> {
 
   @AfterCreate({})
   static async createRecord(instance: UserComment) {
-    await Record.create({ recordTable: 'UserComment', recordId: instance.id });
+    await Record.create({ recordTable: 'UserComment', recordId: instance.id, groupId: instance.groupId });
   }
 }

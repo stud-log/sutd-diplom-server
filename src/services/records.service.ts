@@ -14,7 +14,7 @@ import { UserView } from "../models/user-views.model";
 
 class RecordService {
 
-  async getPost(recordTable: string, recordId: number, userId: number) {
+  async getPost(recordTable: string, recordId: number, userId: number, groupId?: number) {
     const record = await Record.findOne({ where: { recordTable, recordId } });
     if(!record) throw 'Record not found';
 
@@ -68,7 +68,7 @@ class RecordService {
       endDate: string;
     };
     const files = req.files as unknown as { [fieldname: string]: Express.Multer.File[] }; // as {files: File[], cover: File[] but one}
-    const authorId = (req as IUserReq).user.id;
+    const author = (req as IUserReq).user;
 
     const record = await Record.findOne({ where: { recordTable, recordId } });
     if(record) {
@@ -89,7 +89,8 @@ class RecordService {
       let post: News | Homework | null = null;
       if(recordTable == 'News') {
         post = await News.create({
-          authorId,
+          authorId: author.id,
+          groupId: author.groupId,
           title: dto.title,
           content: dto.content,
           label: dto.label,
@@ -98,7 +99,8 @@ class RecordService {
       }
       else {
         post = await Homework.create({
-          authorId,
+          authorId: author.id,
+          groupId: author.groupId,
           title: dto.title,
           content: dto.content,
           type: dto.type as HomeworkType,
@@ -125,15 +127,18 @@ class RecordService {
 
   }
 
-  async getAllPosts(recordTable: string, page: number, limit: number, userId: number){
+  async getAllPosts(recordTable: string, page: number, limit: number, userId: number, groupId?: number){
     const offset = 0 + ((page - 1) * limit);
 
     const records = await Record.findAndCountAll({
-      where: { recordTable },
+      where: {
+        recordTable,
+        ...(groupId ? { groupId } : {})
+      },
       offset: offset,
       limit: limit
     });
-    const rows = await Promise.all(records.rows.map(record => this.getPost(recordTable, record.recordId, userId)));
+    const rows = await Promise.all(records.rows.map(record => this.getPost(recordTable, record.recordId, userId, groupId)));
     return {
       rows,
       count: records.count

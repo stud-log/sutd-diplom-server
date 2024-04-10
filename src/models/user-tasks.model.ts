@@ -1,5 +1,6 @@
 import { BelongsTo, Column, DataType, ForeignKey, HasMany, HasOne, Model, Table } from 'sequelize-typescript';
 
+import { Group } from './group.model';
 import { Record } from './records.model';
 import { User } from './user.model';
 
@@ -12,6 +13,7 @@ export enum UserTaskStatus {
 interface UserTaskAttrs {
   id?: number;
   userId?: number;
+  groupId?: number;
   recordId?: number;
   status: UserTaskStatus;
   title?: string;
@@ -43,6 +45,13 @@ export class UserTask extends Model<UserTask, UserTaskAttrs> {
   
   @BelongsTo(() => User)
     user: User;
+
+  @ForeignKey(() => Group)
+  @Column({ allowNull: true })
+    groupId: number;
+
+  @BelongsTo(() => Group)
+    group: Group;
 
   @ForeignKey(() => Record)
   @Column({ allowNull: true })

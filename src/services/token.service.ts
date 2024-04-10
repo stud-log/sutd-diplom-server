@@ -2,7 +2,7 @@ import { RefreshToken } from '../models/refresh-tokens.model';
 import { RoleCreationDTO } from '@stud-log/news-types/dto';
 import jwt from 'jsonwebtoken';
 
-export type TokenPayload = {id: number; email: string; permissions: RoleCreationDTO['permissions']};
+export type TokenPayload = {id: number; email: string; groupId: number; permissions: RoleCreationDTO['permissions']};
 class TokenService {
   generateTokens(payload: TokenPayload) {
     const accessToken = jwt.sign(payload, process.env.SECRET_KEY as string, { expiresIn: '48h' });

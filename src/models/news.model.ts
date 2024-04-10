@@ -1,11 +1,13 @@
 import { AfterCreate, BelongsTo, Column, DataType, ForeignKey, Model, Table } from 'sequelize-typescript';
 
+import { Group } from './group.model';
 import { Record } from './records.model';
 import { User } from './user.model';
 
 interface NewsAttrs {
   id?: number;
   authorId?: number;
+  groupId: number;
   title: string;
   content: string;
   label?: string;
@@ -16,6 +18,13 @@ interface NewsAttrs {
 export class News extends Model<News, NewsAttrs> {
   @Column({ primaryKey: true, allowNull: false, autoIncrement: true, unique: true })
     id: number;
+
+  @ForeignKey(() => Group)
+  @Column({ allowNull: false })
+    groupId: number;
+
+  @BelongsTo(() => Group)
+    group: Group;
 
   @ForeignKey(() => User)
   @Column({ allowNull: true })
@@ -38,7 +47,7 @@ export class News extends Model<News, NewsAttrs> {
     
   @AfterCreate({})
   static async createRecord(instance: News) {
-    await Record.create({ recordTable: 'News', recordId: instance.id });
+    await Record.create({ recordTable: 'News', recordId: instance.id, groupId: instance.groupId });
   }
 }
 

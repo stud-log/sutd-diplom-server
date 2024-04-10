@@ -1,5 +1,6 @@
 import { AfterCreate, BelongsTo, Column, DataType, ForeignKey, Model, Table } from 'sequelize-typescript';
 
+import { Group } from './group.model';
 import { Record } from './records.model';
 import { Subject } from './subject.model';
 import { User } from './user.model';
@@ -12,6 +13,7 @@ export enum HomeworkType {
 interface HomeworkAttrs {
   id?: number;
   authorId?: number;
+  groupId: number;
   title: string;
   content: string;
   startDate: string;
@@ -31,6 +33,13 @@ export class Homework extends Model<Homework, HomeworkAttrs> {
 
   @BelongsTo(() => Subject)
     subject: Subject;
+
+  @ForeignKey(() => Group)
+  @Column({ allowNull: false })
+    groupId: number;
+
+  @BelongsTo(() => Group)
+    group: Group;
 
   @ForeignKey(() => User)
   @Column({ allowNull: true })
@@ -56,7 +65,7 @@ export class Homework extends Model<Homework, HomeworkAttrs> {
     
   @AfterCreate({})
   static async createRecord(instance: Homework) {
-    await Record.create({ recordTable: 'Homework', recordId: instance.id });
+    await Record.create({ recordTable: 'Homework', recordId: instance.id, groupId: instance.groupId });
   }
 }
 
