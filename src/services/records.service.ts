@@ -1,11 +1,13 @@
 import { Homework, HomeworkType } from "../models/homeworks.model";
 
 import { AppFiles } from "../models/files.model";
+import { Calendar } from "../models/calendar.model";
 import { IUserReq } from "../shared/interfaces/req";
 import { News } from "../models/news.model";
 import { Record } from "../models/records.model";
 import { Request } from "express";
 import { Subject } from "../models/subject.model";
+import { Team } from "../models/teams.model";
 import { Timetable } from "../models/timetable.model";
 import { UserComment } from "../models/user-comments.model";
 import { UserReaction } from "../models/user-reactions.model";
@@ -14,44 +16,70 @@ import { UserView } from "../models/user-views.model";
 
 class RecordService {
 
-  async getPost(recordTable: string, recordId: number, userId: number, groupId?: number) {
-    const record = await Record.findOne({ where: { recordTable, recordId } });
-    if(!record) throw 'Record not found';
+  async getEntity(recordTable: string, recordId: number, userId: number, groupId?: number) {
+    const Entity =
+    recordTable == 'News' ? News :
+      recordTable == 'Homework' ? Homework :
+        recordTable == 'Calendar' ? Calendar :
+          Team;
 
-    let post: News | Homework | null = null;
-    if(recordTable == 'News') {
-      post = await News.findByPk(recordId);
-    }
-    else {
-      post = await Homework.findByPk(recordId, { include: [ Subject ] });
-    }
-
-    if(!post) throw 'Post not found';
-
-    const _comments = await UserComment.findAll({ where: { recordId: record.id } });
-    const _commentsReactions = await UserReaction.findAll({ where: { recordId: _comments.map(c => c.id) } });
-    const postComments = _comments.map(comment => {
-      const commentReactions = _commentsReactions.filter(reaction => reaction.recordId === comment.id);
-      return {
-        ...comment,
-        reactions: commentReactions
-      };
+    const record = await Record.findOne({ where: { recordTable, recordId },
+      include: [
+        Entity,
+        {
+          model: UserComment,
+          required: false,
+          include: [
+            {
+              model: UserComment,
+              as: 'children',
+              required: false,
+              include: [ {
+                model: Record,
+                required: false,
+                include: [
+                  {
+                    model: UserReaction,
+                    required: false
+                  }
+                ],
+              } ]
+            },
+            {
+              model: Record,
+              required: false,
+              include: [
+                {
+                  model: UserReaction,
+                  required: false
+                }
+              ],
+            }
+          ]
+        },
+        {
+          model: UserReaction,
+          required: false
+        },
+        {
+          model: AppFiles,
+          required: false
+        },
+        {
+          model: UserView,
+          required: false
+        },
+        {
+          model: UserTask,
+          where: { userId },
+          required: false
+        }
+      ]
     });
 
-    const postReactions = await UserReaction.findAll({ where: { recordId: record.id } });
-    const postFiles = await AppFiles.findAll({ where: { recordId: record.id } });
-    const postViews = await UserView.findAll({ where: { recordId: record.id } });
-    const asUserTask = await UserTask.findOne({ where: { recordId: record.id, userId } });
+    if(!record) throw 'Record not found';
 
-    return {
-      record,
-      post,
-      postComments,
-      postReactions,
-      postFiles,
-      postViews: postViews.length,
-      asUserTask
-    };
+    return record;
 
   }
 
@@ -127,7 +155,13 @@ class RecordService {
 
   }
 
-  async getAllPosts(recordTable: string, page: number, limit: number, userId: number, groupId?: number){
+  async getAllEntities(recordTable: string, page: number, limit: number, userId: number, groupId?: number){
+    const Entity =
+    recordTable == 'News' ? News :
+      recordTable == 'Homework' ? Homework :
+        recordTable == 'Calendar' ? Calendar :
+          Team;
+
     const offset = 0 + ((page - 1) * limit);
 
     const records = await Record.findAndCountAll({
@@ -136,13 +170,61 @@ class RecordService {
         ...(groupId ? { groupId } : {})
       },
       offset: offset,
-      limit: limit
+      limit: limit,
+      include: [
+        Entity,
+        {
+          model: UserComment,
+          required: false,
+          include: [
+            {
+              model: UserComment,
+              as: 'children',
+              required: false,
+              include: [ {
+                model: Record,
+                required: false,
+                include: [
+                  {
+                    model: UserReaction,
+                    required: false
+                  }
+                ],
+              } ]
+            },
+            {
+              model: Record,
+              required: false,
+              include: [
+                {
+                  model: UserReaction,
+                  required: false
+                }
+              ],
+            }
+          ]
+        },
+        {
+          model: UserReaction,
+          required: false
+        },
+        {
+          model: AppFiles,
+          required: false
+        },
+        {
+          model: UserView,
+          required: false
+        },
+        {
+          model: UserTask,
+          where: { userId },
+          required: false
+        }
+      ]
     });
-    const rows = await Promise.all(records.rows.map(record => this.getPost(recordTable, record.recordId, userId, groupId)));
-    return {
-      rows,
-      count: records.count
-    };
+    
+    return records;
   }
 
 }

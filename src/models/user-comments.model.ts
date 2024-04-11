@@ -55,6 +55,12 @@ export class UserComment extends Model<UserComment, UserCommentAttrs> {
   })
     parent: UserComment;
 
+  @HasMany(() => UserComment, {
+    as: 'children',
+    foreignKey: 'parentId',
+  })
+    children: UserComment[];
+
   @Column({ allowNull: true })
     title: string;
 

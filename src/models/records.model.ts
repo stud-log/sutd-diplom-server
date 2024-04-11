@@ -1,6 +1,13 @@
-import { BelongsTo, Column, DataType, ForeignKey, Model, Table } from 'sequelize-typescript';
+import { BelongsTo, Column, DataType, ForeignKey, HasMany, HasOne, Model, Table } from 'sequelize-typescript';
 
+import { AppFiles } from './files.model';
 import { Group } from './group.model';
+import { Homework } from './homeworks.model';
+import { News } from './news.model';
+import { UserComment } from './user-comments.model';
+import { UserReaction } from './user-reactions.model';
+import { UserTask } from './user-tasks.model';
+import { UserView } from './user-views.model';
 
 interface RecordAttrs {
   recordTable: string;
@@ -28,4 +35,26 @@ export class Record extends Model<Record, RecordAttrs> {
 
   @Column({ allowNull: false })
     recordId: number;
+
+  @HasOne(() => News)
+    news: News;
+
+  @HasOne(() => Homework)
+    homework: Homework;
+
+  @HasMany(() => UserComment)
+    comments: UserComment[];
+
+  @HasMany(() => UserReaction)
+    reactions: UserReaction[];
+
+  @HasMany(() => AppFiles)
+    files: AppFiles[];
+
+  @HasMany(() => UserTask)
+    userTasks: UserTask[];
+
+  @HasMany(() => UserView)
+    views: UserView[];
+
 }

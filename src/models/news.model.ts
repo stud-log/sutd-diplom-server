@@ -32,6 +32,13 @@ export class News extends Model<News, NewsAttrs> {
   
   @BelongsTo(() => User)
     author: User;
+
+  @ForeignKey(() => Record)
+  @Column({ allowNull: true })
+    recordId: number;
+  
+  @BelongsTo(() => Record)
+    record: Record;
     
   @Column({ allowNull: false })
     title: string;
@@ -47,7 +54,9 @@ export class News extends Model<News, NewsAttrs> {
     
   @AfterCreate({})
   static async createRecord(instance: News) {
-    await Record.create({ recordTable: 'News', recordId: instance.id, groupId: instance.groupId });
+    const record = await Record.create({ recordTable: 'News', recordId: instance.id, groupId: instance.groupId });
+    instance.recordId = record.id;
+    await instance.save();
   }
 }
 

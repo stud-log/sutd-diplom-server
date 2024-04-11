@@ -11,9 +11,12 @@ class RecordController {
     if(recordId && recordTable) {
       if(!isNaN(Number(recordId)))
         return await recordService
-          .getPost(recordTable, Number(recordId), (req as IUserReq).user.id, (req as IUserReq).user.groupId)
+          .getEntity(recordTable, Number(recordId), (req as IUserReq).user.id, (req as IUserReq).user.groupId)
           .then(post => res.json(post))
-          .catch(err => next(ApiError.badRequest(err)));
+          .catch(err => {
+            console.log(err);
+            next(ApiError.badRequest(err));
+          });
     }
     
     return next(ApiError.badRequest('Params missing'));
@@ -25,7 +28,7 @@ class RecordController {
     const { page, limit } = req.query;
     if(recordTable && !!page && !!limit) {
       return await recordService
-        .getAllPosts(recordTable, Number(page), Number(limit), (req as IUserReq).user.id, (req as IUserReq).user.groupId)
+        .getAllEntities(recordTable, Number(page), Number(limit), (req as IUserReq).user.id, (req as IUserReq).user.groupId)
         .then(post => res.json(post))
         .catch(err => next(ApiError.badRequest(err)));
     }

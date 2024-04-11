@@ -1,5 +1,6 @@
-import { AfterCreate, Column, DataType, Model, Table } from 'sequelize-typescript';
+import { AfterCreate, BelongsTo, Column, DataType, ForeignKey, Model, Table } from 'sequelize-typescript';
 
+import { Group } from './group.model';
 import { Record } from './records.model';
 
 export enum CalendarActivityType {
@@ -23,6 +24,20 @@ interface CalendarAttrs {
 export class Calendar extends Model<Calendar, CalendarAttrs> {
   @Column({ primaryKey: true, allowNull: false, autoIncrement: true, unique: true })
     id: number;
+
+  @ForeignKey(() => Record)
+  @Column({ allowNull: true })
+    recordId: number;
+  
+  @BelongsTo(() => Record)
+    record: Record;
+
+  @ForeignKey(() => Group)
+  @Column({ allowNull: false })
+    groupId: number;
+
+  @BelongsTo(() => Group)
+    group: Group;
     
   @Column({ allowNull: false })
     activityId: number;
@@ -38,7 +53,9 @@ export class Calendar extends Model<Calendar, CalendarAttrs> {
     
   @AfterCreate({})
   static async createRecord(instance: Calendar) {
-    await Record.create({ recordTable: 'Calendar', recordId: instance.id });
+    const record = await Record.create({ recordTable: 'Calendar', recordId: instance.id, groupId: instance.groupId });
+    instance.recordId = record.id;
+    await instance.save();
   }
 }
 

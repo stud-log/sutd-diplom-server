@@ -17,6 +17,13 @@ export class Team extends Model<Team, TeamAttrs> {
   @Column({ primaryKey: true, allowNull: false, autoIncrement: true, unique: true })
     id: number;
 
+  @ForeignKey(() => Record)
+  @Column({ allowNull: true })
+    recordId: number;
+  
+  @BelongsTo(() => Record)
+    record: Record;
+
   @ForeignKey(() => Group)
   @Column({ allowNull: false })
     groupId: number;
@@ -39,7 +46,9 @@ export class Team extends Model<Team, TeamAttrs> {
     
   @AfterCreate({})
   static async createRecord(instance: Team) {
-    await Record.create({ recordTable: 'Team', recordId: instance.id, groupId: instance.groupId });
+    const record = await Record.create({ recordTable: 'Team', recordId: instance.id, groupId: instance.groupId });
+    instance.recordId = record.id;
+    await instance.save();
   }
 }
 
