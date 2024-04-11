@@ -6,7 +6,7 @@ import recordService from "../services/records.service";
 
 class RecordController {
   
-  getPost = async (req: Request, res: Response, next: NextFunction) => {
+  getEntity = async (req: Request, res: Response, next: NextFunction) => {
     const { recordTable, recordId } = req.params;
     if(recordId && recordTable) {
       if(!isNaN(Number(recordId)))
@@ -23,12 +23,20 @@ class RecordController {
    
   };
 
-  getAllPosts = async (req: Request, res: Response, next: NextFunction) => {
+  getAllEntities = async (req: Request, res: Response, next: NextFunction) => {
     const { recordTable } = req.params;
     const { page, limit } = req.query;
     if(recordTable && !!page && !!limit) {
       return await recordService
-        .getAllEntities(recordTable, Number(page), Number(limit), (req as IUserReq).user.id, (req as IUserReq).user.groupId)
+        .getAllEntities(
+          recordTable,
+          Number(page),
+          Number(limit),
+          (req as IUserReq).user.id,
+          (req as IUserReq).user.groupId,
+          Number(req.query.subjectId),
+          req.query.label as string,
+        )
         .then(post => res.json(post))
         .catch(err => next(ApiError.badRequest(err)));
     }

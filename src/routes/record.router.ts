@@ -6,8 +6,8 @@ import { uploadFiles } from "../middleware/upload-many-files.middleware";
 
 const recordRouter = Router();
 
-recordRouter.get('/post/:recordTable/:recordId', authMiddleware(), recordController.getPost);
-recordRouter.get('/posts/:recordTable', authMiddleware(), recordController.getAllPosts);
+recordRouter.get('/post/:recordTable/:recordId', authMiddleware(), recordController.getEntity);
+recordRouter.get('/posts/:recordTable', authMiddleware(), recordController.getAllEntities);
 
 recordRouter.post('/post/:recordTable/:recordId', authMiddleware({ canEdit: true }), checkUploadPath('posts'), uploadFiles([ 'files', 'cover' ], 'posts', 20), recordController.createOrUpdatePost);
 

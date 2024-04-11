@@ -139,6 +139,7 @@ class RecordService {
       }
 
       if(!post) throw 'Post was not created';
+      
       const _record = await Record.findOne({ where: { recordTable, recordId: post.id } });
       if(_record && files && files['files'].length > 0) {
         await AppFiles.bulkCreate(files['files'].map(file => ({
@@ -155,7 +156,15 @@ class RecordService {
 
   }
 
-  async getAllEntities(recordTable: string, page: number, limit: number, userId: number, groupId?: number){
+  async getAllEntities(
+    recordTable: string,
+    page: number,
+    limit: number,
+    userId: number,
+    groupId?: number,
+    subjectId?: number,
+    label?: string,
+  ){
     const Entity =
     recordTable == 'News' ? News :
       recordTable == 'Homework' ? Homework :
@@ -172,7 +181,13 @@ class RecordService {
       offset: offset,
       limit: limit,
       include: [
-        Entity,
+        {
+          model: Entity,
+          where: {
+            ...(subjectId ? { subjectId } : {}),
+            ...(label ? { label } : {})
+          }
+        },
         {
           model: UserComment,
           required: false,
