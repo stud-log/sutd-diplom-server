@@ -75,4 +75,5 @@ export class UserTask extends Model<UserTask, UserTaskAttrs> {
   @Column({ allowNull: true })
     doneDate: string;
 
+//TODO: добавить как сущность рекорда, чтобы можно было оставлять к задаче комментарии
 }

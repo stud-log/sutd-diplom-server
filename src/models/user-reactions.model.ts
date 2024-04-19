@@ -8,6 +8,7 @@ interface UserReactionAttrs {
   userId: number;
   recordId: number;
   type: string;
+  imageUrl?: string;
 }
 
 @Table({ tableName: 'UserReactions' })
@@ -31,5 +32,8 @@ export class UserReaction extends Model<UserReaction, UserReactionAttrs> {
 
   @Column({ allowNull: false })
     type: string;
+
+  @Column({ allowNull: true, type: DataType.TEXT })
+    imageUrl: string;
 
 }

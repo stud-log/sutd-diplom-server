@@ -1,10 +1,13 @@
 import { BelongsTo, Column, DataType, ForeignKey, HasMany, HasOne, Model, Table } from 'sequelize-typescript';
 
 import { AppFiles } from './files.model';
+import { Calendar } from './calendar.model';
 import { Group } from './group.model';
 import { Homework } from './homeworks.model';
 import { News } from './news.model';
+import { Team } from './teams.model';
 import { UserComment } from './user-comments.model';
+import { UserFavorite } from './user-favorites.model';
 import { UserReaction } from './user-reactions.model';
 import { UserTask } from './user-tasks.model';
 import { UserView } from './user-views.model';
@@ -42,11 +45,20 @@ export class Record extends Model<Record, RecordAttrs> {
   @HasOne(() => Homework)
     homework: Homework;
 
+  @HasOne(() => Calendar)
+    calendar: Calendar;
+
+  @HasOne(() => Team)
+    team: Team;
+
   @HasMany(() => UserComment)
     comments: UserComment[];
 
   @HasMany(() => UserReaction)
     reactions: UserReaction[];
+
+  @HasMany(() => UserFavorite)
+    inFavorites: UserFavorite[];
 
   @HasMany(() => AppFiles)
     files: AppFiles[];

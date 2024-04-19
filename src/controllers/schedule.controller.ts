@@ -24,6 +24,54 @@ class ScheduleController {
       return next(ApiError.internal(err as string));
     }
   };
+
+  migrateGlobalCycledTimetableToCalendar = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      return await scheduleService
+        .migrateGlobalCycledTimetableToCalendar(req.body.groupId)
+        .then(post => res.json(post));
+      
+    } catch (err) {
+      console.log(err);
+      return next(ApiError.internal(err as string));
+    }
+  };
+
+  getSchedule = async (req: Request, res: Response, next: NextFunction) => {
+    const { groupId } = req.params;
+    const { wholeTable } = req.query;
+    if(!isNaN(Number(groupId))){
+      return await scheduleService
+        .getSchedule(Number(groupId), Boolean(wholeTable))
+        .then(resp => res.json(resp))
+        .catch(err => {
+          console.log(err);
+          return next(ApiError.badRequest(err));
+        });
+    }
+    else {
+      return next(ApiError.badRequest('Param is missing'));
+    }
+   
+  };
+
+  getScheduleElement = async (req: Request, res: Response, next: NextFunction) => {
+    const { recordId } = req.params;
+    
+    if(!isNaN(Number(recordId))){
+      return await scheduleService
+        .getScheduleElement(Number(recordId))
+        .then(resp => res.json(resp))
+        .catch(err => {
+          console.log(err);
+          return next(ApiError.badRequest(err));
+        });
+    }
+    else {
+      return next(ApiError.badRequest('Param is missing'));
+    }
+   
+  };
 }
 
 export default new ScheduleController();

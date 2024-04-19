@@ -65,3 +65,21 @@ export const sequelize = new Sequelize({
     UserView,
   ],
 });
+
+/**
+ * Fix count bug
+ */
+sequelize.addHook('beforeCount', function (options) {
+  //@ts-expect-error `this`
+  if (this._scope.include && this._scope.include.length > 0) {
+    options.distinct = true;
+    //@ts-expect-error `this`
+    options.col = this._scope.col || options.col || `"${this.options.name.singular}".id`;
+  }
+  //@ts-expect-error `this`
+  if (options.include && options.include.length > 0) {
+    //@ts-expect-error `this`
+    options.include = null;
+  }
+});
+

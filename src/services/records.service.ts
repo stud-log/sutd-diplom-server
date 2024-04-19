@@ -10,9 +10,11 @@ import { Subject } from "../models/subject.model";
 import { Team } from "../models/teams.model";
 import { Timetable } from "../models/timetable.model";
 import { UserComment } from "../models/user-comments.model";
+import { UserFavorite } from "../models/user-favorites.model";
 import { UserReaction } from "../models/user-reactions.model";
 import { UserTask } from "../models/user-tasks.model";
 import { UserView } from "../models/user-views.model";
+import { sequelize } from "../db";
 
 class RecordService {
 
@@ -23,7 +25,63 @@ class RecordService {
         recordTable == 'Calendar' ? Calendar :
           Team;
 
-    const record = await Record.findOne({ where: { recordTable, recordId },
+    const record = await Record.findOne({
+      where: { recordTable, recordId },
+      attributes: {
+        include: [
+          [ sequelize.literal(`(
+            SELECT COALESCE(
+                json_agg(json_build_object(
+                    'id', "UserReactions"."id",
+                    'userId', "UserReactions"."userId",
+                    'recordId', "UserReactions"."recordId",
+                    'type', "UserReactions"."type",
+                    'imageUrl', "UserReactions"."imageUrl"
+                    -- Add more properties as needed
+                )),
+                '[]'::json
+            ) AS user_reactions
+            FROM 
+                "UserReactions" 
+            WHERE 
+                "recordId" = "Record"."id" AND 
+                "userId" = ${userId}
+        )`),
+          'meReacted' ],
+          [ sequelize.literal(`(
+            SELECT CASE 
+              WHEN EXISTS (
+                SELECT * FROM "UserFavorites" WHERE "recordId" = "Record"."id" AND "userId" = ${userId}
+              ) THEN TRUE 
+              ELSE FALSE 
+            END
+          )`),
+          'meFavorited' ],
+          [ sequelize.literal(`(
+            SELECT COALESCE(
+                json_agg(json_build_object(
+                    'id', "UserTasks"."id",
+                    'userId', "UserTasks"."userId",
+                    'groupId', "UserTasks"."groupId",
+                    'recordId', "UserTasks"."recordId",
+                    'title', "UserTasks"."title",
+                    'description', "UserTasks"."description",
+                    'trackedTime', "UserTasks"."trackedTime",
+                    'status', "UserTasks"."status",
+                    'doneDate', "UserTasks"."doneDate"
+                    -- Add more properties as needed
+                )),
+                '[]'::json
+            ) AS user_tasks
+            FROM 
+                "UserTasks" 
+            WHERE 
+                "recordId" = "Record"."id" AND 
+                "userId" = ${userId}
+        )`),
+          'meWorked' ]
+        ]
+      },
       include: [
         Entity,
         {
@@ -180,13 +238,73 @@ class RecordService {
       },
       offset: offset,
       limit: limit,
+      attributes: {
+        include: [
+          [ sequelize.literal(`(
+            SELECT COALESCE(
+                json_agg(json_build_object(
+                    'id', "UserReactions"."id",
+                    'userId', "UserReactions"."userId",
+                    'recordId', "UserReactions"."recordId",
+                    'type', "UserReactions"."type",
+                    'imageUrl', "UserReactions"."imageUrl"
+                    -- Add more properties as needed
+                )),
+                '[]'::json
+            ) AS user_reactions
+            FROM 
+                "UserReactions" 
+            WHERE 
+                "recordId" = "Record"."id" AND 
+                "userId" = ${userId}
+        )`),
+          'meReacted' ],
+          [ sequelize.literal(`(
+            SELECT CASE 
+              WHEN EXISTS (
+                SELECT * FROM "UserFavorites" WHERE "recordId" = "Record"."id" AND "userId" = ${userId}
+              ) THEN TRUE 
+              ELSE FALSE 
+            END
+          )`),
+          'meFavorited' ],
+          [ sequelize.literal(`(
+            SELECT COALESCE(
+                json_agg(json_build_object(
+                    'id', "UserTasks"."id",
+                    'userId', "UserTasks"."userId",
+                    'groupId', "UserTasks"."groupId",
+                    'recordId', "UserTasks"."recordId",
+                    'title', "UserTasks"."title",
+                    'description', "UserTasks"."description",
+                    'trackedTime', "UserTasks"."trackedTime",
+                    'status', "UserTasks"."status",
+                    'doneDate', "UserTasks"."doneDate"
+                    -- Add more properties as needed
+                )),
+                '[]'::json
+            ) AS user_tasks
+            FROM 
+                "UserTasks" 
+            WHERE 
+                "recordId" = "Record"."id" AND 
+                "userId" = ${userId}
+        )`),
+          'meWorked' ]
+        ]
+      },
       include: [
         {
           model: Entity,
           where: {
-            ...(subjectId ? { subjectId } : {}),
+            ...(subjectId && subjectId != -1 ? { subjectId } : {}),
             ...(label ? { label } : {})
-          }
+          },
+          
+          ...(recordTable == 'Homework' ? { include: [
+            Subject
+          ] } : {})
+          
         },
         {
           model: UserComment,
@@ -220,6 +338,10 @@ class RecordService {
           ]
         },
         {
+          model: UserFavorite,
+          required: false
+        },
+        {
           model: UserReaction,
           required: false
         },
@@ -231,15 +353,33 @@ class RecordService {
           model: UserView,
           required: false
         },
-        {
-          model: UserTask,
-          where: { userId },
-          required: false
-        }
       ]
     });
     
     return records;
+  }
+
+  async react ( dto: {recordId: number; type: string; imageUrl: string}, userId: number) {
+    try {
+      const exitedReaction = await UserReaction.findOne({ where: { userId, recordId: dto.recordId } });
+      if(exitedReaction) {
+        exitedReaction.type = dto.type;
+        exitedReaction.imageUrl = dto.imageUrl;
+        return await exitedReaction.save();
+        
+      }
+      return await UserReaction.create({
+        userId,
+        type: dto.type,
+        imageUrl: dto.imageUrl,
+        recordId: dto.recordId
+      }, { returning: true });
+    }
+    catch (err) {
+      console.log(err);
+      //TODO: add event emitter to admins
+      throw 'Не удалось добавить реакцию';
+    }
   }
 
 }

@@ -10,5 +10,6 @@ recordRouter.get('/post/:recordTable/:recordId', authMiddleware(), recordControl
 recordRouter.get('/posts/:recordTable', authMiddleware(), recordController.getAllEntities);
 
 recordRouter.post('/post/:recordTable/:recordId', authMiddleware({ canEdit: true }), checkUploadPath('posts'), uploadFiles([ 'files', 'cover' ], 'posts', 20), recordController.createOrUpdatePost);
+recordRouter.post('/post/react', authMiddleware(), recordController.react);
 
 export { recordRouter };

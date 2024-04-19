@@ -14,8 +14,7 @@ class RecordController {
           .getEntity(recordTable, Number(recordId), (req as IUserReq).user.id, (req as IUserReq).user.groupId)
           .then(post => res.json(post))
           .catch(err => {
-            console.log(err);
-            next(ApiError.badRequest(err));
+            return next(ApiError.badRequest(err));
           });
     }
     
@@ -38,7 +37,10 @@ class RecordController {
           req.query.label as string,
         )
         .then(post => res.json(post))
-        .catch(err => next(ApiError.badRequest(err)));
+        .catch(err => {
+          console.log(err);
+          return next(ApiError.badRequest(err));
+        });
     }
     
     return next(ApiError.badRequest('Params missing'));
@@ -53,6 +55,22 @@ class RecordController {
           .createOrUpdatePost(recordTable, Number(recordId), req)
           .then(post => res.json(post))
           .catch(err => next(ApiError.badRequest(err)));
+    }
+    
+    return next(ApiError.badRequest('Params missing'));
+   
+  };
+
+  react = async (req: Request, res: Response, next: NextFunction) => {
+    const { recordId } = req.body;
+    if(recordId) {
+      if(!isNaN(Number(recordId)))
+        return await recordService
+          .react(req.body, (req as IUserReq).user.id)
+          .then(post => res.json(post))
+          .catch(err => {
+            return next(ApiError.badRequest(err));
+          });
     }
     
     return next(ApiError.badRequest('Params missing'));

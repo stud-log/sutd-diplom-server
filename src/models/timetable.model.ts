@@ -52,7 +52,7 @@ export interface TimetableAttrs {
  * * link - ссылка на ДО (может быть пустым)
  * * type - лекция\практика\экзамен
  */
-@Table({ tableName: 'Timetable' })
+@Table({ tableName: 'Timetables' })
 export class Timetable extends Model<Timetable, TimetableAttrs> {
   @Column({ primaryKey: true, allowNull: false, autoIncrement: true, unique: true })
     id: number;
