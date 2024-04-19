@@ -150,7 +150,7 @@ class ScheduleService {
         recordTable: 'Calendar',
         groupId
       },
-      
+      order: [ [ { model: Calendar, as: 'calendar' } , 'startDate', 'ASC' ] ],
       include: [
         {
           model: Calendar,
@@ -162,6 +162,7 @@ class ScheduleService {
               },
             }
           }),
+          
           attributes: {
             include: [
               [ sequelize.literal(`(
@@ -217,7 +218,8 @@ class ScheduleService {
             ],
           },
         },
-      ]
+      ],
+      
     });
   }
 
