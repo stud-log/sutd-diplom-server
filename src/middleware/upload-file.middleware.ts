@@ -15,7 +15,10 @@ export const uploadFile = (filename: string, filepath?: string) => (
 ) => {
   const storage = multer.diskStorage({
     destination: (req, file, cb) => cb(null, path.join('src', 'static', filepath || '/')),
-    filename: (req, file, cb) => cb(null, Date.now() + path.extname(file.originalname)),
+    filename: (req, file, cb) => {
+      cb(null, Date.now() + path.extname(file.originalname));
+      file.originalname = Buffer.from(file.originalname, 'latin1').toString('utf8');
+    },
   });
   const upload = multer({ storage }).single(filename);
 

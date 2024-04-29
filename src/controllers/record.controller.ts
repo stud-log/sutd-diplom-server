@@ -9,13 +9,17 @@ class RecordController {
   getEntity = async (req: Request, res: Response, next: NextFunction) => {
     const { recordTable, recordId } = req.params;
     if(recordId && recordTable) {
-      if(!isNaN(Number(recordId)))
+      if(!isNaN(Number(recordId))){
         return await recordService
           .getEntity(recordTable, Number(recordId), (req as IUserReq).user.id, (req as IUserReq).user.groupId)
           .then(post => res.json(post))
           .catch(err => {
             return next(ApiError.badRequest(err));
           });
+      }
+      else {
+        return next(ApiError.badRequest('Params invalid'));
+      }
     }
     
     return next(ApiError.badRequest('Params missing'));
@@ -50,11 +54,15 @@ class RecordController {
   createOrUpdatePost = async (req: Request, res: Response, next: NextFunction) => {
     const { recordTable, recordId } = req.params;
     if(recordId && recordTable) {
-      if(!isNaN(Number(recordId)))
+      if(!isNaN(Number(recordId))){
         return await recordService
           .createOrUpdatePost(recordTable, Number(recordId), req)
           .then(post => res.json(post))
           .catch(err => next(ApiError.badRequest(err)));
+      }
+      else {
+        return next(ApiError.badRequest('Params invalid'));
+      }
     }
     
     return next(ApiError.badRequest('Params missing'));
@@ -64,13 +72,57 @@ class RecordController {
   react = async (req: Request, res: Response, next: NextFunction) => {
     const { recordId } = req.body;
     if(recordId) {
-      if(!isNaN(Number(recordId)))
+      if(!isNaN(Number(recordId))){
         return await recordService
           .react(req.body, (req as IUserReq).user.id)
           .then(post => res.json(post))
           .catch(err => {
             return next(ApiError.badRequest(err));
           });
+      }
+      else {
+        return next(ApiError.badRequest('Params invalid'));
+      }
+    }
+    
+    return next(ApiError.badRequest('Params missing'));
+   
+  };
+
+  favorite = async (req: Request, res: Response, next: NextFunction) => {
+    const { recordId } = req.body;
+    if(recordId) {
+      if(!isNaN(Number(recordId))){
+        return await recordService
+          .favorite(req.body, (req as IUserReq).user.id)
+          .then(post => res.json(post))
+          .catch(err => {
+            return next(ApiError.badRequest(err));
+          });
+      }
+      else {
+        return next(ApiError.badRequest('Params invalid'));
+      }
+    }
+    
+    return next(ApiError.badRequest('Params missing'));
+   
+  };
+
+  comment = async (req: Request, res: Response, next: NextFunction) => {
+    const { recordId } = req.body;
+    if(recordId) {
+      if(!isNaN(Number(recordId))){
+        return await recordService
+          .comment(req, (req as IUserReq).user.id, (req as IUserReq).user.groupId)
+          .then(post => res.json(post))
+          .catch(err => {
+            return next(ApiError.badRequest(err));
+          });
+      }
+      else {
+        return next(ApiError.badRequest('Params invalid'));
+      }
     }
     
     return next(ApiError.badRequest('Params missing'));

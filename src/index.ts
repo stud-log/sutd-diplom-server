@@ -24,7 +24,7 @@ app.use(
 );
 app.use(express.json());
 app.use(cookieParser());
-app.use('/static', express.static(path.join(__dirname , '/static')));
+app.use('/static', express.static(path.resolve(__dirname , 'static')));
 app.use('/api', router);
 app.use(errorHandler);
 

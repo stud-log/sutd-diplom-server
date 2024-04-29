@@ -58,7 +58,7 @@ export class Record extends Model<Record, RecordAttrs> {
     reactions: UserReaction[];
 
   @HasMany(() => UserFavorite)
-    inFavorites: UserFavorite[];
+    favorites: UserFavorite[];
 
   @HasMany(() => AppFiles)
     files: AppFiles[];
