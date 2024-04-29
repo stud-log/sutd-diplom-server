@@ -1,8 +1,9 @@
 import { Calendar, CalendarActivityType } from "../models/calendar.model";
-import { Timetable, TimetableAttrs, TimetableWeekdays, TimetableWeekparities } from "../models/timetable.model";
+import { Timetable, TimetableAttrs, TimetableWeekdays, TimetableWeekparities, weekdayOrder } from "../models/timetable.model";
 
 import { Op } from "sequelize";
 import { Record } from "../models/records.model";
+import { Subject } from "../models/subject.model";
 import moment from "moment";
 import { sequelize } from "../db";
 import timetableService from "./timetable.service";
@@ -46,6 +47,26 @@ class ScheduleService {
       throw 'Error creating timetable';
     }
   }
+
+  /**
+   * Используется при локальном изменении расписания старостой группы из приложения
+   */
+  async regenerateGroupCycledTimetable(
+    groupId: number,
+    dto: TimetableAttrs[]
+  ) {
+    try {
+      await Timetable.destroy({ where: { groupId } });
+      await Timetable.bulkCreate(dto);
+      await this.migrateGlobalCycledTimetableToCalendar(groupId);
+      return true;
+    }
+    catch(e) {
+      console.log(e);
+      throw 'При обновлении расписания группы произошла непредвиденная ошибка';
+    }
+
+  }
   
   async migrateGlobalCycledTimetableToCalendar(groupId?: number) {
     try {
@@ -56,7 +77,7 @@ class ScheduleService {
 
       if (today.month() < 5) { // If the current month is before June (the first half of the year)
         startDate = today; // Start from today
-        endDate = moment(today).startOf('year').add(5, 'months'); // End on June 1st of the current year
+        endDate = moment(today).startOf('year').add(8, 'months'); // End on August 1st of the current year
       } else { // If the current month is June or later (the second half of the year)
         startDate = today; // Start from today
         endDate = moment(today).endOf('year'); // End on December 31st of the current year
@@ -64,31 +85,31 @@ class ScheduleService {
 
       // Fetch all rows from the Timetable table
       const timetables = await Timetable.findAll({ ...(groupId ? { where: { groupId } }: {}) });
-
       // Array to hold all calendar entries
       const calendarEntries = [];
 
       // Iterate over each timetable entry
       for (const timetable of timetables) {
         // Check if the timetable entry should be added to the calendar based on its weekparity
-        if (timetable.weekparity === TimetableWeekparities.both || timetable.weekparity === (today.date() % 2 === 0 ? TimetableWeekparities.even : TimetableWeekparities.odd)) {
-          // Calculate start date of the timetable entry
-          let startDateTime = moment(startDate).startOf('day');
-          startDateTime = startDateTime.day(this.getWeekdayNumber(timetable.weekday as TimetableWeekdays));
-          startDateTime.set({
-            hour: parseInt(timetable.startTime.slice(0, 2), 10),
-            minute: parseInt(timetable.startTime.slice(3), 10)
-          });
+          
+        // Calculate start date of the timetable entry
+        let startDateTime = moment(startDate).startOf('day');
+        startDateTime = startDateTime.day(this.getWeekdayNumber(timetable.weekday as TimetableWeekdays));
+        startDateTime.set({
+          hour: parseInt(timetable.startTime.slice(0, 2), 10),
+          minute: parseInt(timetable.startTime.slice(3), 10)
+        });
 
-          // Calculate end date of the timetable entry
-          let endDateTime = moment(startDateTime);
-          endDateTime.set({
-            hour: parseInt(timetable.endTime.slice(0, 2), 10),
-            minute: parseInt(timetable.endTime.slice(3), 10)
-          });
+        // Calculate end date of the timetable entry
+        let endDateTime = moment(startDateTime);
+        endDateTime.set({
+          hour: parseInt(timetable.endTime.slice(0, 2), 10),
+          minute: parseInt(timetable.endTime.slice(3), 10)
+        });
 
-          // Repeat the timetable entry until the end date
-          while (endDateTime <= endDate) {
+        // Repeat the timetable entry until the end date
+        while (endDateTime <= endDate) {
+          if (timetable.weekparity === TimetableWeekparities.both || timetable.weekparity === (endDateTime.date() % 2 === 0 ? TimetableWeekparities.even : TimetableWeekparities.odd)) {
             // Add the calendar entry
             calendarEntries.push({
               groupId: timetable.groupId,
@@ -99,13 +120,13 @@ class ScheduleService {
               // Copy other relevant fields from Timetable to Calendar
               // Adjust field names accordingly
             });
-
-            // Move to the next occurrence
-            startDateTime = startDateTime.add(1, 'weeks');
-            endDateTime = endDateTime.add(1, 'weeks');
           }
+          // Move to the next occurrence
+          startDateTime = startDateTime.add(1, 'weeks');
+          endDateTime = endDateTime.add(1, 'weeks');
         }
       }
+      
       if(groupId) {
         await Record.destroy({ where: { groupId, recordTable: 'Calendar' }, cascade: true });
         await Calendar.destroy({ where: { groupId } });
@@ -113,7 +134,7 @@ class ScheduleService {
         await Record.destroy({ where: { recordTable: 'Calendar' }, cascade: true });
         await Calendar.truncate({ cascade: true });
       }
-      // Bulk create entries in the Calendar table
+      // Сreate entries in the Calendar table
       // __NOTE__: we cant use bulk create because of using afterCreate hook
       await Promise.all(calendarEntries.map(entry => Calendar.create(entry)));
 
@@ -292,6 +313,27 @@ class ScheduleService {
           },
         },
       ]
+    });
+  }
+
+  async getGroupTimetable (groupId: number) {
+
+    return await Timetable.findAll({
+      where: {
+        groupId
+      },
+      order: [
+        sequelize.literal(`CASE
+        WHEN weekday = '${TimetableWeekdays.Mon}' THEN 1
+        WHEN weekday = '${TimetableWeekdays.Tue}' THEN 2
+        WHEN weekday = '${TimetableWeekdays.Wed}' THEN 3
+        WHEN weekday = '${TimetableWeekdays.Thu}' THEN 4
+        WHEN weekday = '${TimetableWeekdays.Fri}' THEN 5
+        WHEN weekday = '${TimetableWeekdays.Sat}' THEN 6
+        WHEN weekday = '${TimetableWeekdays.Sun}' THEN 7
+          END ASC`),
+      ],
+      include: [ Subject ]
     });
   }
   

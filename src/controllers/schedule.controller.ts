@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 
 import { ApiError } from "../shared/error/ApiError";
+import { IUserReq } from "../shared/interfaces/req";
 import fs from 'fs';
 import scheduleService from "../services/schedule.service";
 
@@ -37,6 +38,25 @@ class ScheduleController {
     }
   };
 
+  regenerateGroupCycledTimetable = async (req: Request, res: Response, next: NextFunction) => {
+    const { groupId } = req.params;
+    const numGroupId = Number(groupId);
+    if(!isNaN(numGroupId)){
+      if((req as IUserReq).user.groupId == numGroupId) {
+        return await scheduleService
+          .regenerateGroupCycledTimetable(numGroupId, req.body)
+          .then(resp => res.json(resp))
+          .catch(err => next(ApiError.badRequest(err)));
+      } else {
+        return next(ApiError.badRequest('You don\'t have permission to change other schedules'));
+      }
+    }
+    else {
+      return next(ApiError.badRequest('Param is missing'));
+    }
+
+  };
+  
   getSchedule = async (req: Request, res: Response, next: NextFunction) => {
     const { groupId } = req.params;
     const { wholeTable } = req.query;
@@ -54,13 +74,30 @@ class ScheduleController {
     }
    
   };
-
+  
   getScheduleElement = async (req: Request, res: Response, next: NextFunction) => {
     const { recordId } = req.params;
     
     if(!isNaN(Number(recordId))){
       return await scheduleService
         .getScheduleElement(Number(recordId))
+        .then(resp => res.json(resp))
+        .catch(err => {
+          console.log(err);
+          return next(ApiError.badRequest(err));
+        });
+    }
+    else {
+      return next(ApiError.badRequest('Param is missing'));
+    }
+    
+  };
+  
+  getGroupTimetable = async (req: Request, res: Response, next: NextFunction) => {
+    const { groupId } = req.params;
+    if(!isNaN(Number(groupId))){
+      return await scheduleService
+        .getGroupTimetable(Number(groupId))
         .then(resp => res.json(resp))
         .catch(err => {
           console.log(err);

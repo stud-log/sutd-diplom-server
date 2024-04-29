@@ -39,6 +39,16 @@ export interface TimetableAttrs {
   link?: string;
 }
 
+export const weekdayOrder = {
+  [TimetableWeekdays.Mon]: 1,
+  [TimetableWeekdays.Tue]: 2,
+  [TimetableWeekdays.Wed]: 3,
+  [TimetableWeekdays.Thu]: 4,
+  [TimetableWeekdays.Fri]: 5,
+  [TimetableWeekdays.Sat]: 6,
+  [TimetableWeekdays.Sun]: 7,
+};
+
 /**
  *
  * Расписание это цикличное повторение одних и тех же предметов,

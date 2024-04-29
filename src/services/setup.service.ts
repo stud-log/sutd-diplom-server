@@ -104,9 +104,9 @@ class SetupService {
           weekparity: converseWeekparity(data[11]),
           startTime: splittedTime[0],
           endTime: splittedTime[1],
-          classroom: data[14]
+          classroom: data[14],
+          link: ''
         };
-        console.log(structuredData);
         
         csvData.push(structuredData);
         // Вычитаем 20%, так как на этом операции не заканчиваются

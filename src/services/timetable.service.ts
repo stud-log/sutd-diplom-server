@@ -72,7 +72,8 @@ class TimetableService {
           weekparity: converseWeekparity(data[11]),
           startTime: splittedTime[0],
           endTime: splittedTime[1],
-          classroom: data[14]
+          classroom: data[14],
+          link: ''
         };
         csvData.push(structuredData);
         // Вычитаем 20%, так как на этом операции не заканчиваются

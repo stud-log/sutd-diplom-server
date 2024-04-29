@@ -8,12 +8,15 @@ const scheduleRouter = Router();
 
 scheduleRouter.get('/:groupId', scheduleController.getSchedule);
 scheduleRouter.get('/one/:recordId', scheduleController.getScheduleElement);
+scheduleRouter.get('/timetable/:groupId', scheduleController.getGroupTimetable);
 
 /**
  * Uses for recreating all timetable for all groups
  * __NOTE__: Table must be without headers! Only rows!
  */
 scheduleRouter.post('/regenerateGlobalCycledTimetable', checkUploadPath('timetables'), uploadFile('table'), scheduleController.regenerateGlobalCycledTimetable);
+
+scheduleRouter.post('/regenerateGroupCycledTimetable/:groupId', authMiddleware({ canEdit: true }), scheduleController.regenerateGroupCycledTimetable);
 
 scheduleRouter.post('/migrateGlobalCycledTimetableToCalendar', scheduleController.migrateGlobalCycledTimetableToCalendar);
 

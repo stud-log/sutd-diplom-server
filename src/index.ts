@@ -1,4 +1,5 @@
 import { RolePermission } from './models/role-permissions.model';
+import { Timetable } from './models/timetable.model';
 import { UserRole } from './models/user-roles.model';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
@@ -37,7 +38,6 @@ const createDefaultRecords = async () => {
   const [ mentorRole ] = await UserRole.findOrCreate({ where: { title: "Староста" }, defaults: { title: "Староста" } });
   await RolePermission.findOrCreate({ where: { roleId: mentorRole.id }, defaults: { roleId: mentorRole.id, canEdit: true, canInvite: true } });
 
-  /* Create default roles */
 };
 
 const start = async () => {
