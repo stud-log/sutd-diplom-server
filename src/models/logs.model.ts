@@ -10,6 +10,9 @@ export enum LogType {
   create = 'create',
   service = 'service',
   readGuide = 'readGuide',
+  nonAttendance = 'nonAttendance',
+  nonPassedHomeworks = 'nonPassedHomeworks',
+
 }
 
 interface LogAttrs {

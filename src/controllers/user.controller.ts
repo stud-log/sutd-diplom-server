@@ -92,13 +92,20 @@ class UserController {
   };
 
   manageAccount = async (req: Request, res: Response, next: NextFunction) => {
-    if(req.body.accountId && req.body.status) {
-      return await userService
-        .manageAccount(req.body)
-        .then(resp => res.json(resp))
-        .catch(err => next(ApiError.badFormData(err)));
-    }
-    return next(ApiError.badFormData('Params missing'));
+    
+    return await userService
+      .manageAccount(req.body)
+      .then(resp => res.json(resp))
+      .catch(err => next(ApiError.badFormData(err)));
+    
+  };
+
+  isGuideSeen = async (req: Request, res: Response, next: NextFunction) => {
+    
+    return await logService
+      .isGuideSeen((req as IUserReq).user.id)
+      .then(resp => res.json(resp))
+      .catch(err => next(ApiError.badFormData(err)));
     
   };
 

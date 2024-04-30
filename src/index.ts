@@ -1,8 +1,10 @@
+import { Achievement } from './models/achievements.model';
 import { RolePermission } from './models/role-permissions.model';
 import { Timetable } from './models/timetable.model';
 import { UserRole } from './models/user-roles.model';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
+import { defaultAchievements } from './shared/_defaults/achievements';
 import { errorHandler } from './middleware/error-handling.middleware';
 import express from 'express';
 import path from 'path';
@@ -38,6 +40,8 @@ const createDefaultRecords = async () => {
   const [ mentorRole ] = await UserRole.findOrCreate({ where: { title: "Староста" }, defaults: { title: "Староста" } });
   await RolePermission.findOrCreate({ where: { roleId: mentorRole.id }, defaults: { roleId: mentorRole.id, canEdit: true, canInvite: true } });
 
+  /** Create default achievements */
+  // await Achievement.bulkCreate(defaultAchievements);
 };
 
 const start = async () => {

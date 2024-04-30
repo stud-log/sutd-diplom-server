@@ -1,6 +1,7 @@
 import { Log, LogType } from "../models/logs.model";
 
 import { Achievement } from "../models/achievements.model";
+import { Op } from "sequelize";
 import { UserAchievement } from "../models/user-achievements.model";
 import em from './event-emmiter';
 import moment from "moment";
@@ -24,7 +25,7 @@ class AchievementsLogService {
         await Log.create({ type: LogType.entrance, userId, isPublic: true } );
       }
 
-      // this.checkForAchievementByEntrance(userId);
+      this.checkForAchievementByEntrance(userId);
     }
     catch (e) {
       console.log(e);
@@ -33,16 +34,29 @@ class AchievementsLogService {
 
   }
 
+  /**
+   * Смотрим, не получил ли пользователь достижение, связанное с частотой захода в приложение
+   */
   async checkForAchievementByEntrance(userId: number) {
+    if(!(await this.isGuideSeen(userId))) return; // просто чтобы не спамить. Выдадим достижение после прохождения туториала.
+
     const entrances = await Log.findAndCountAll({ where: { userId, type: LogType.entrance } });
     const count = entrances.count;
     
-    const achievement = await Achievement.findOne({ where: { conditions: { entrances: count } } });
+    const achievement = await Achievement.findOne({ where: { condition: { entrance: count } } });
     if(achievement) {
-      // значит пользователю сейчас нужно выдать достижение
-      const achieve = await UserAchievement.create({ userId, achievementId: achievement.id });
-      em.publish('achievementReceived', userId, achieve);
+      const isAlreadyReceived = await UserAchievement.findOne({ where: { userId, achievementId: achievement.id } });
+      if(!isAlreadyReceived) {
+        // пользователю нужно выдать достижение
+        await UserAchievement.create({ userId, achievementId: achievement.id });
+        em.publish('achievementReceived', userId, achievement);
+      }
     }
+  }
+
+  async isGuideSeen (userId: number) {
+    const guideSeen = await Log.findOne({ where: { userId, type: LogType.readGuide } });
+    return !!guideSeen;
   }
 
 }

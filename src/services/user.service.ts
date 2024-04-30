@@ -7,6 +7,7 @@ import { RolePermission } from "../models/role-permissions.model";
 import { RoleService } from './role.service';
 import { TemporaryLink } from '../models/tmp-links.model';
 import { UserRole } from "../models/user-roles.model";
+import { UserSetting } from '../models/user-settings.model';
 import bcrypt from 'bcryptjs';
 import groupService from "./group.service";
 import { mailRecoveryTemplate } from '../shared/templates/mail/recovery.template';
@@ -22,12 +23,13 @@ class UserService {
   }
 
   async getMe(id: number) {
-    return await User.findByPk(id, { include: [ { model: UserRole, include: [ RolePermission ] }, Group ] });
+    return await User.findByPk(id, { include: [ { model: UserRole, include: [ RolePermission ] }, Group, UserSetting ] });
   }
 
+  // TODO: why two similar methods??
   async getOne(id: number) {
     if(isNaN(id)) throw "Id must be number";
-    return await User.findByPk(id);
+    return await User.findByPk(id, { include: [ { model: UserRole, include: [ RolePermission ] }, Group, UserSetting ] });
   }
 
   async registration (regDto: RegDTO) {
@@ -54,7 +56,8 @@ class UserService {
         patronymic: regDto.patronymic.trim(),
         phone: regDto.phone,
         roleId: role.id,
-        groupId: group.id
+        groupId: group.id,
+        avatarUrl: '/_defaults/avatars/1.svg'
       },
       { returning: true, },
     );
@@ -146,14 +149,11 @@ class UserService {
 
   /**
    * используется старостой
-   * @param accountId - айди аккаунта, который нужно принять/отклонить
+   * @param accountId - айдишники аккаунтов, который нужно принять/отклонить
    */
-  async manageAccount (dto: {accountId: number; status: UserStatus} ) {
+  async manageAccount (dto: {accounts: number[]; status: UserStatus} ) {
     try {
-      const user = await User.findByPk(dto.accountId);
-      if (!user) throw 'Такой пользователь не зарегистрирован';
-      user.status = dto.status;
-      await user.save();
+      await User.update({ status: dto.status }, { where: { id: dto.accounts } });
       return true;
     }
     catch(e) {

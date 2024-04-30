@@ -11,6 +11,8 @@ const userRouter = Router();
 userRouter.get('', adminMiddleware(), userController.getAll);
 userRouter.get('/refresh', userController.refresh);
 userRouter.get('/me', authMiddleware(), userController.getMe);
+userRouter.get('/checkGuide', authMiddleware(), userController.isGuideSeen);
+
 userRouter.get(
   '/:id',
   param('id').exists({ checkFalsy: true }),

@@ -13,6 +13,7 @@ import { User } from "../models/user.model";
 import { UserComment } from "../models/user-comments.model";
 import { UserFavorite } from "../models/user-favorites.model";
 import { UserReaction } from "../models/user-reactions.model";
+import { UserSetting } from "../models/user-settings.model";
 import { UserTask } from "../models/user-tasks.model";
 import { UserView } from "../models/user-views.model";
 import em from './event-emmiter';
@@ -99,13 +100,29 @@ class RecordService {
           model: UserComment,
           required: false,
           include: [
-            User,
+            {
+              model: User,
+              include: [
+                {
+                  model: UserSetting,
+                  required: false
+                }
+              ]
+            },
             {
               model: UserComment,
               as: 'children',
               required: false,
               include: [
-                User,
+                {
+                  model: User,
+                  include: [
+                    {
+                      model: UserSetting,
+                      required: false
+                    }
+                  ]
+                },
                 {
                   model: Record,
                   required: false,
@@ -262,7 +279,6 @@ class RecordService {
         if(_record && files && files['files'] && files['files'].length > 0) {
           await AppFiles.bulkCreate(files['files'].map(file => ({
             recordId: _record.id,
-            //TODO: Исправить кодировку
             fileName: file.originalname,
             fileSize: file.size,
             url: file.path.split('src\\static').pop() as string

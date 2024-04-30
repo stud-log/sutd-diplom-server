@@ -1,6 +1,6 @@
 import { Column, DataType, Model, Table } from 'sequelize-typescript';
 
-interface AchievementAttrs {
+export interface AchievementAttrs {
   id?: number;
   title: string;
   description: string;

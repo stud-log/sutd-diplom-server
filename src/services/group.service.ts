@@ -1,4 +1,7 @@
+import { User, UserStatus } from "../models/user.model";
+
 import { Group } from "../models/group.model";
+import { UserSetting } from "../models/user-settings.model";
 
 class GroupService {
 
@@ -12,6 +15,10 @@ class GroupService {
 
   async getByName(name: string) {
     return await Group.findOne({ where: { name } });
+  }
+
+  async groupUsers(groupId: number) {
+    return await User.findAll({ where: { groupId, status: [ UserStatus.approved, UserStatus.inReview ] }, order: [ [ 'status', 'ASC' ] ], include: [ { model: UserSetting, required: false } ] });
   }
 
 }
