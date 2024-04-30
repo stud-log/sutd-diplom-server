@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 
 import { ApiError } from "../shared/error/ApiError";
 import { IUserReq } from "../shared/interfaces/req";
+import logService from "../services/log.service";
 import userService from "../services/user.service";
 
 class UserController {
@@ -43,6 +44,7 @@ class UserController {
     try {
       const userData = await userService.login(req.body);
       res.cookie('refreshToken', userData.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true });
+      logService.userEnter(userData.user.id);
       return res.json(userData);
     } catch (e) {
       console.log(e);
@@ -67,6 +69,7 @@ class UserController {
       const { refreshToken } = req.cookies;
       const userData = await userService.refresh(refreshToken);
       res.cookie('refreshToken', userData.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true });
+      logService.userEnter(userData.user.id);
       return res.json(userData);
     } catch (e) {
       console.log(e);
@@ -86,6 +89,17 @@ class UserController {
       .passRecoveryUpdate(req.body)
       .then(resp => res.json(resp))
       .catch(err => next(ApiError.badFormData(err)));
+  };
+
+  manageAccount = async (req: Request, res: Response, next: NextFunction) => {
+    if(req.body.accountId && req.body.status) {
+      return await userService
+        .manageAccount(req.body)
+        .then(resp => res.json(resp))
+        .catch(err => next(ApiError.badFormData(err)));
+    }
+    return next(ApiError.badFormData('Params missing'));
+    
   };
 
 }

@@ -6,6 +6,10 @@ class GroupService {
     return await Group.findAll();
   }
 
+  async getByPK(id: number) {
+    return await Group.findByPk(id);
+  }
+
   async getByName(name: string) {
     return await Group.findOne({ where: { name } });
   }

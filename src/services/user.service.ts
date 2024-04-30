@@ -39,7 +39,7 @@ class UserService {
 
     const hashedPassword = await bcrypt.hash(regDto.password.trim(), 5);
     const role = regDto.role == 'mentor' ? await this.roleService.getMentorRole() : await this.roleService.getStudentRole();
-    const group = await groupService.getByName(regDto.group);
+    const group = await groupService.getByPK(regDto.groupId);
     
     if(!role) throw "Такой роли не существует"; // must have not to be here
     if(!group) throw "Такой группы не существует"; // must have not to be here
@@ -141,6 +141,24 @@ class UserService {
         
       TemporaryLink.destroy({ where: { hash } });
       return { result: true };
+    }
+  }
+
+  /**
+   * используется старостой
+   * @param accountId - айди аккаунта, который нужно принять/отклонить
+   */
+  async manageAccount (dto: {accountId: number; status: UserStatus} ) {
+    try {
+      const user = await User.findByPk(dto.accountId);
+      if (!user) throw 'Такой пользователь не зарегистрирован';
+      user.status = dto.status;
+      await user.save();
+      return true;
+    }
+    catch(e) {
+      console.log(e);
+      throw 'Не удалось изменить статус аккаунта';
     }
   }
 

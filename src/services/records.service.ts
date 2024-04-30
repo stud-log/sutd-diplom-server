@@ -15,6 +15,7 @@ import { UserFavorite } from "../models/user-favorites.model";
 import { UserReaction } from "../models/user-reactions.model";
 import { UserTask } from "../models/user-tasks.model";
 import { UserView } from "../models/user-views.model";
+import em from './event-emmiter';
 import fs from 'fs';
 import path from 'path';
 import { sequelize } from "../db";

@@ -2,6 +2,7 @@ import { Log, LogType } from "../models/logs.model";
 
 import { Achievement } from "../models/achievements.model";
 import { UserAchievement } from "../models/user-achievements.model";
+import em from './event-emmiter';
 import moment from "moment";
 
 class AchievementsLogService {
@@ -23,7 +24,7 @@ class AchievementsLogService {
         await Log.create({ type: LogType.entrance, userId, isPublic: true } );
       }
 
-      this.checkForAchievementByEntrance(userId);
+      // this.checkForAchievementByEntrance(userId);
     }
     catch (e) {
       console.log(e);
@@ -39,8 +40,8 @@ class AchievementsLogService {
     const achievement = await Achievement.findOne({ where: { conditions: { entrances: count } } });
     if(achievement) {
       // значит пользователю сейчас нужно выдать достижение
-      await UserAchievement.create({ userId, achievementId: achievement.id });
-      //TODO: emit user event
+      const achieve = await UserAchievement.create({ userId, achievementId: achievement.id });
+      em.publish('achievementReceived', userId, achieve);
     }
   }
 

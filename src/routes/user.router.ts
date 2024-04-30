@@ -25,7 +25,7 @@ userRouter.post(
   body('password').isLength({ min: 6 }),
   body('lastName').exists({ checkFalsy: true }),
   body('patronymic'),
-  body('group').exists({ checkFalsy: true }),
+  body('groupId').exists({ checkFalsy: true }),
   body('phone').exists({ checkFalsy: true }),
   body('role'),
   validateRequestMiddleware,
@@ -55,5 +55,7 @@ userRouter.post(
   validateRequestMiddleware,
   userController.passRecoveryUpdate,
 );
+
+userRouter.post('/manage', authMiddleware({ canInvite: true }), userController.manageAccount);
 
 export { userRouter };

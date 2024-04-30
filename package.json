@@ -36,7 +36,7 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
-    "@stud-log/news-types": "^1.1.22",
+    "@stud-log/news-types": "^1.1.34",
     "@stylistic/eslint-plugin": "^1.6.2",
     "@stylistic/eslint-plugin-js": "^1.6.2",
     "@stylistic/eslint-plugin-ts": "^1.6.2",
