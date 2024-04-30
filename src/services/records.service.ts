@@ -15,6 +15,7 @@ import { UserFavorite } from "../models/user-favorites.model";
 import { UserReaction } from "../models/user-reactions.model";
 import { UserSetting } from "../models/user-settings.model";
 import { UserTask } from "../models/user-tasks.model";
+import { UserTaskStatus } from './../models/user-tasks.model';
 import { UserView } from "../models/user-views.model";
 import em from './event-emmiter';
 import fs from 'fs';
@@ -24,17 +25,18 @@ import { sequelize } from "../db";
 class RecordService {
 
   async getEntity(recordTable: string, recordId: number, userId: number, groupId?: number) {
-    const Entity =
+    try {
+      const Entity =
     recordTable == 'News' ? News :
       recordTable == 'Homework' ? Homework :
         recordTable == 'Calendar' ? Calendar :
           Team;
 
-    const record = await Record.findOne({
-      where: { recordTable, recordId },
-      attributes: {
-        include: [
-          [ sequelize.literal(`(
+      const record = await Record.findOne({
+        where: { recordTable, recordId },
+        attributes: {
+          include: [
+            [ sequelize.literal(`(
             SELECT COALESCE(
                 json_agg(json_build_object(
                     'id', "UserReactions"."id",
@@ -52,8 +54,8 @@ class RecordService {
                 "recordId" = "Record"."id" AND 
                 "userId" = ${userId}
         )`),
-          'meReacted' ],
-          [ sequelize.literal(`(
+            'meReacted' ],
+            [ sequelize.literal(`(
             SELECT CASE 
               WHEN EXISTS (
                 SELECT * FROM "UserFavorites" WHERE "recordId" = "Record"."id" AND "userId" = ${userId}
@@ -61,8 +63,8 @@ class RecordService {
               ELSE FALSE 
             END
           )`),
-          'meFavorited' ],
-          [ sequelize.literal(`(
+            'meFavorited' ],
+            [ sequelize.literal(`(
             SELECT COALESCE(
                 json_agg(json_build_object(
                     'id', "UserTasks"."id",
@@ -84,95 +86,103 @@ class RecordService {
                 "recordId" = "Record"."id" AND 
                 "userId" = ${userId}
         )`),
-          'meWorked' ]
-        ]
-      },
-      include: [
-        {
-          model: Entity,
-          ...(recordTable == 'Homework' ? { include: [
-            Subject
-          ] } : {})
-          
-        },
-        
-        {
-          model: UserComment,
-          required: false,
-          include: [
-            {
-              model: User,
-              include: [
-                {
-                  model: UserSetting,
-                  required: false
-                }
-              ]
-            },
-            {
-              model: UserComment,
-              as: 'children',
-              required: false,
-              include: [
-                {
-                  model: User,
-                  include: [
-                    {
-                      model: UserSetting,
-                      required: false
-                    }
-                  ]
-                },
-                {
-                  model: Record,
-                  required: false,
-                  include: [
-                    {
-                      model: UserReaction,
-                      required: false
-                    }
-                  ],
-                } ]
-            },
-            {
-              model: Record,
-              required: false,
-              include: [
-                {
-                  model: UserReaction,
-                  required: false
-                }
-              ],
-            }
+            'meWorked' ]
           ]
         },
-        {
-          model: UserReaction,
-          required: false
-        },
-        {
-          model: AppFiles,
-          required: false
-        },
-        {
-          model: UserView,
-          required: false
-        },
-        {
-          model: UserFavorite,
-          required: false
-        },
-        {
-          model: UserTask,
-          where: { userId },
-          required: false
-        }
-      ]
-    });
+        include: [
+          {
+            model: Entity,
+            ...(recordTable == 'Homework' ? { include: [
+              Subject
+            ] } : {})
+          
+          },
+        
+          {
+            model: UserComment,
+            required: false,
+            include: [
+              {
+                model: Record,
+                as: 'myRecord',
+                include: [
+                  {
+                    model: UserReaction,
+                    required: false
+                  }
+                ],
+              },
+              {
+                model: User,
+                include: [
+                  {
+                    model: UserSetting,
+                    required: false
+                  }
+                ]
+              },
+              {
+                model: UserComment,
+                as: 'children',
+                required: false,
+                include: [
+                  {
+                    model: Record,
+                    as: 'myRecord',
+                   
+                    include: [
+                      {
+                        model: UserReaction,
+                        required: false
+                      }
+                    ],
+                  },
+                  {
+                    model: User,
+                    include: [
+                      {
+                        model: UserSetting,
+                        required: false
+                      }
+                    ]
+                  },
+                ]
+              }
+            
+            ]
+          },
+          {
+            model: UserReaction,
+            required: false
+          },
+          {
+            model: AppFiles,
+            required: false
+          },
+          {
+            model: UserView,
+            required: false
+          },
+          {
+            model: UserFavorite,
+            required: false
+          },
+          {
+            model: UserTask,
+            where: { userId },
+            required: false
+          }
+        ]
+      });
 
-    if(!record) throw 'Record not found';
+      if(!record) throw 'Record not found';
 
-    return record;
+      return record;
+    }
+    catch(e) {
+      console.log(e);
+      throw e;
+    }
 
   }
 
@@ -401,6 +411,7 @@ class RecordService {
               include: [ {
                 model: Record,
                 required: false,
+                as: 'myRecord',
                 include: [
                   {
                     model: UserReaction,
@@ -412,6 +423,7 @@ class RecordService {
             {
               model: Record,
               required: false,
+              as: 'myRecord',
               include: [
                 {
                   model: UserReaction,
@@ -485,10 +497,21 @@ class RecordService {
       throw 'Не удалось добавить в избранное';
     }
   }
-  
+
+  async view ( recordId: number , userId: number) {
+    try {
+      await UserView.findOrCreate({ where: { userId, recordId }, defaults: { userId, recordId } });
+      return true;
+    }
+    catch (err) {
+      console.log(err);
+      throw 'Не удалось добавить просмотров';
+    }
+  }
+   
   async comment( req: Request , userId: number, groupId: number) {
     try {
-      const dto = req.body as {recordId: string; content: string; parentId: string; isNote: string; title: string};
+      const dto = req.body as {recordId: string; content: string; parentId: string; isNote: '0' | '1'; title: string};
       const files = req.files as unknown as { [fieldname: string]: Express.Multer.File[] }; // as {files: File[], cover: File[] but one}
       
       const comment = await UserComment.create({
@@ -496,9 +519,10 @@ class RecordService {
         content: dto.content,
         recordId: Number(dto.recordId),
         userId,
-        isNote: Boolean(dto.isNote),
+        isNote: Boolean(Number(dto.isNote)), //isNote like '0' | '1'
         title: dto.title,
-        ...(dto.parentId != '-1' && isNaN(Number(dto.parentId)) ? { parentId: Number(dto.parentId) } : {})
+        myRecordId: Number(dto.recordId), // Will overwritten after create
+        ...(dto.parentId != '-1' && !isNaN(Number(dto.parentId)) ? { parentId: Number(dto.parentId) } : {})
 
       });
       if(!comment) throw 'Комментарий не создан';

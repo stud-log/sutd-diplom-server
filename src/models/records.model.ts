@@ -51,7 +51,7 @@ export class Record extends Model<Record, RecordAttrs> {
   @HasOne(() => Team)
     team: Team;
 
-  @HasMany(() => UserComment)
+  @HasMany(() => UserComment, { foreignKey: 'recordId' })
     comments: UserComment[];
 
   @HasMany(() => UserReaction)

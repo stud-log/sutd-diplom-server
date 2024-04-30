@@ -3,6 +3,7 @@ import { NextFunction, Request, Response } from "express";
 import { ApiError } from "../shared/error/ApiError";
 import { IUserReq } from "../shared/interfaces/req";
 import recordService from "../services/records.service";
+import taskService from "../services/task.service";
 
 class RecordController {
   
@@ -115,6 +116,46 @@ class RecordController {
       if(!isNaN(Number(recordId))){
         return await recordService
           .comment(req, (req as IUserReq).user.id, (req as IUserReq).user.groupId)
+          .then(post => res.json(post))
+          .catch(err => {
+            return next(ApiError.badRequest(err));
+          });
+      }
+      else {
+        return next(ApiError.badRequest('Params invalid'));
+      }
+    }
+    
+    return next(ApiError.badRequest('Params missing'));
+   
+  };
+
+  view = async (req: Request, res: Response, next: NextFunction) => {
+    const { recordId } = req.body;
+    if(recordId) {
+      if(!isNaN(Number(recordId))){
+        return await recordService
+          .view(Number(recordId), (req as IUserReq).user.id)
+          .then(post => res.json(post))
+          .catch(err => {
+            return next(ApiError.badRequest(err));
+          });
+      }
+      else {
+        return next(ApiError.badRequest('Params invalid'));
+      }
+    }
+    
+    return next(ApiError.badRequest('Params missing'));
+   
+  };
+
+  changeHomeworkStatus = async (req: Request, res: Response, next: NextFunction) => {
+    const { recordId } = req.body;
+    if(recordId) {
+      if(!isNaN(Number(recordId))){
+        return await taskService
+          .changeHomeworkStatus(req.body, (req as IUserReq).user.id)
           .then(post => res.json(post))
           .catch(err => {
             return next(ApiError.badRequest(err));

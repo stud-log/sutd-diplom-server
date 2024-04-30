@@ -13,6 +13,7 @@ interface UserCommentAttrs {
   title?: string;
   content: string;
   isNote: boolean;
+  myRecordId: number;
 }
 /**
  * Комментарии пользователей
@@ -40,9 +41,16 @@ export class UserComment extends Model<UserComment, UserCommentAttrs> {
 
   @ForeignKey(() => Record)
   @Column({ allowNull: false })
+    myRecordId: number;
+  
+  @BelongsTo(() => Record, { as: 'myRecord' })
+    myRecord: Record;
+
+  @ForeignKey(() => Record)
+  @Column({ allowNull: false })
     recordId: number;
   
-  @BelongsTo(() => Record)
+  @BelongsTo(() => Record, { as: 'record' })
     record: Record;
 
   @Column({ allowNull: true })
@@ -72,6 +80,8 @@ export class UserComment extends Model<UserComment, UserCommentAttrs> {
 
   @AfterCreate({})
   static async createRecord(instance: UserComment) {
-    await Record.create({ recordTable: 'UserComment', recordId: instance.id, groupId: instance.groupId });
+    const record = await Record.create({ recordTable: 'UserComment', recordId: instance.id, groupId: instance.groupId });
+    instance.myRecordId = record.id;
+    await instance.save();
   }
 }
