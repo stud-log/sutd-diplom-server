@@ -23,6 +23,7 @@ import { UserFavorite } from './models/user-favorites.model';
 import { UserNotification } from './models/user-notifications.model';
 import { UserReaction } from './models/user-reactions.model';
 import { UserRole } from './models/user-roles.model';
+import { UserSetting } from './models/user-settings.model';
 import { UserTask, } from './models/user-tasks.model';
 import { UserTeam } from './models/user-teams.model';
 import { UserView } from './models/user-views.model';
@@ -50,6 +51,7 @@ export const sequelize = new Sequelize({
     RolePermission,
     Subject,
     Team,
+    UserSetting,
     TemporaryLink,
     Timetable,
     User,

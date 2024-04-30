@@ -6,6 +6,7 @@ interface AchievementAttrs {
   description: string;
   imgSrc: string;
   condition: any;
+  trophy: any;
 }
 @Table({ tableName: 'Achievements' })
 export class Achievement extends Model<Achievement, AchievementAttrs> {
@@ -21,6 +22,9 @@ export class Achievement extends Model<Achievement, AchievementAttrs> {
   @Column({ allowNull: false, type: DataType.TEXT })
     imgSrc: string;
 
-  @Column({ type: DataType.JSONB })
+  @Column({ type: DataType.JSONB, allowNull: true })
     condition: any;
+
+  @Column({ type: DataType.JSONB, allowNull: true })
+    trophy: any;
 }

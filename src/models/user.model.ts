@@ -1,12 +1,14 @@
-import { BelongsTo, BelongsToMany, Column, DataType, ForeignKey, HasMany, HasOne, Model, Table } from 'sequelize-typescript';
+import { AfterCreate, BelongsTo, BelongsToMany, Column, DataType, ForeignKey, HasMany, HasOne, Model, Table } from 'sequelize-typescript';
 
 import { Group } from './group.model';
+import { Log } from './logs.model';
 import { UserAchievement } from './user-achievements.model';
 import { UserAttendance } from './user-attendance.model';
 import { UserComment } from './user-comments.model';
 import { UserFavorite } from './user-favorites.model';
 import { UserNotification } from './user-notifications.model';
 import { UserRole } from './user-roles.model';
+import { UserSetting } from './user-settings.model';
 import { UserTask } from './user-tasks.model';
 import { UserTeam } from './user-teams.model';
 
@@ -23,6 +25,7 @@ interface UserAttrs {
   firstName: string;
   lastName: string;
   patronymic?: string; // отчество
+  nickname?: string; // отчество
   email: string;
   password: string;
   phone: string;
@@ -49,6 +52,9 @@ export class User extends Model<User, UserAttrs> {
   @BelongsTo(() => Group)
     group: Group;
 
+  @HasOne(() => UserSetting)
+    settings: UserSetting;
+
   @HasMany(() => UserComment)
     comments: UserComment[];
   
@@ -69,6 +75,12 @@ export class User extends Model<User, UserAttrs> {
 
   @HasMany(() => UserAchievement)
     achievements: UserAchievement[];
+
+  @HasMany(() => Log)
+    logs: Log[];
+
+  @Column({ allowNull: true })
+    nickname: string;
 
   @Column({ allowNull: false })
     firstName: string;
@@ -94,4 +106,8 @@ export class User extends Model<User, UserAttrs> {
   @Column({ values: Object.values(UserStatus), allowNull: false })
     status: string;
   
+  @AfterCreate({})
+  static async createRecord(instance: User) {
+    await UserSetting.create({ userId: instance.id });
+  }
 }
