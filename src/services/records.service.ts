@@ -94,6 +94,10 @@ class RecordService {
             model: Entity,
             ...(recordTable == 'Homework' ? { include: [
               Subject
+            ] } : {}),
+            
+            ...(recordTable == 'News' ? { include: [
+              { model: User, as: 'author', include: [ UserSetting ] }
             ] } : {})
           
           },
@@ -178,6 +182,33 @@ class RecordService {
       if(!record) throw 'Record not found';
 
       return record;
+    }
+    catch(e) {
+      console.log(e);
+      throw e;
+    }
+
+  }
+
+  async getEntityUserTasks(recordTable: string, recordId: number, userId: number, groupId?: number) {
+    try {
+    
+      const record = await Record.findOne({
+        where: { recordTable, recordId },
+        include: [
+          {
+            model: UserTask,
+            required: false,
+            include: [
+              { model: User, include: [ UserSetting ] }
+            ]
+          }
+        ]
+      });
+
+      if(!record) throw 'Record not found';
+
+      return record.userTasks;
     }
     catch(e) {
       console.log(e);
@@ -392,11 +423,15 @@ class RecordService {
           model: Entity,
           where: {
             ...(subjectId && subjectId != -1 ? { subjectId } : {}),
-            ...(label ? { label } : {})
+            ...(label && label != '-1' ? { label } : {})
           },
           
           ...(recordTable == 'Homework' ? { include: [
             Subject
+          ] } : {}),
+
+          ...(recordTable == 'News' ? { include: [
+            { model: User, as: 'author', include: [ UserSetting ] }
           ] } : {})
           
         },

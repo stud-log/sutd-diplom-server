@@ -27,6 +27,26 @@ class RecordController {
    
   };
 
+  getEntityUserTasks = async (req: Request, res: Response, next: NextFunction) => {
+    const { recordTable, recordId } = req.params;
+    if(recordId && recordTable) {
+      if(!isNaN(Number(recordId))){
+        return await recordService
+          .getEntityUserTasks(recordTable, Number(recordId), (req as IUserReq).user.id, (req as IUserReq).user.groupId)
+          .then(post => res.json(post))
+          .catch(err => {
+            return next(ApiError.badRequest(err));
+          });
+      }
+      else {
+        return next(ApiError.badRequest('Params invalid'));
+      }
+    }
+    
+    return next(ApiError.badRequest('Params missing'));
+   
+  };
+
   getAllEntities = async (req: Request, res: Response, next: NextFunction) => {
     const { recordTable } = req.params;
     const { page, limit } = req.query;
