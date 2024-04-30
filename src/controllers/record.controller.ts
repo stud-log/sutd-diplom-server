@@ -60,6 +60,7 @@ class RecordController {
           (req as IUserReq).user.groupId,
           Number(req.query.subjectId),
           req.query.label as string,
+          req.query.favorites as string,
         )
         .then(post => res.json(post))
         .catch(err => {

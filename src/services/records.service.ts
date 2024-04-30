@@ -347,6 +347,7 @@ class RecordService {
     groupId?: number,
     subjectId?: number,
     label?: string,
+    favorites?: string,
   ){
     const Entity =
     recordTable == 'News' ? News :
@@ -470,7 +471,10 @@ class RecordService {
         },
         {
           model: UserFavorite,
-          required: false
+          ...(favorites && favorites != '-1' ? {
+            where: { userId },
+            required: true
+          } : { required: false })
         },
         {
           model: UserReaction,
@@ -541,6 +545,16 @@ class RecordService {
     catch (err) {
       console.log(err);
       throw 'Не удалось добавить просмотров';
+    }
+  }
+
+  async getFavorites (userId: number) {
+    try {
+      return await UserFavorite.findAll({ where: { userId } });
+    }
+    catch (err) {
+      console.log(err);
+      throw 'Не удалось найти избранные';
     }
   }
    
