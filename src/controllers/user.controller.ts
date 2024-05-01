@@ -49,6 +49,13 @@ class UserController {
       .catch(err => next(ApiError.badRequest(err)));
   };
 
+  update = async (req: Request, res: Response, next: NextFunction) => {
+    return await userService
+      .update(req.body, (req as IUserReq).user.id)
+      .then(post => res.json(post))
+      .catch(err => next(ApiError.badRequest(err)));
+  };
+
   async registration(req: Request, res: Response, next: NextFunction) {
     try {
       const userData = await userService.registration(req.body);
@@ -124,6 +131,15 @@ class UserController {
     
     return await logService
       .isGuideSeen((req as IUserReq).user.id)
+      .then(resp => res.json(resp))
+      .catch(err => next(ApiError.badFormData(err)));
+    
+  };
+
+  seenGuideLine = async (req: Request, res: Response, next: NextFunction) => {
+    
+    return await userService
+      .seenGuideLine((req as IUserReq).user.id)
       .then(resp => res.json(resp))
       .catch(err => next(ApiError.badFormData(err)));
     

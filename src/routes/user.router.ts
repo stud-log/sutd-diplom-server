@@ -60,6 +60,8 @@ userRouter.post(
   userController.passRecoveryUpdate,
 );
 
+userRouter.post('/update', authMiddleware(), userController.update);
 userRouter.post('/manage', authMiddleware({ canInvite: true }), userController.manageAccount);
+userRouter.post('/seenGuideline', authMiddleware(), userController.seenGuideLine);
 
 export { userRouter };

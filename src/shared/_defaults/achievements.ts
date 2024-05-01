@@ -10,9 +10,9 @@ export const defaultAchievements: AchievementAttrs[] = [
     },
     trophy: {
       avatars: [
-        { url:  '/_defaults/1.svg' },
-        { url:  '/_defaults/2.svg' },
-        { url:  '/_defaults/3.svg' },
+        { url:  '/_defaults/avatars/1.svg' },
+        { url:  '/_defaults/avatars/2.svg' },
+        { url:  '/_defaults/avatars/3.svg' },
       ]
     }
   },
@@ -21,7 +21,7 @@ export const defaultAchievements: AchievementAttrs[] = [
     description: "Сегодня - староста группы, завтра - староста мира",
     imgSrc: '/_defaults/achievements/otlichnik.png',
     condition: {
-      entrance: 1
+      mentor: true
     },
     trophy: {
       avatars: [

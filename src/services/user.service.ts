@@ -1,6 +1,8 @@
+import { Log, LogType } from '../models/logs.model';
 import { LoginDTO, RegDTO, ResetPasswordDTO } from '@stud-log/news-types/dto';
 import { User, UserStatus } from "../models/user.model";
 
+import { Achievement } from '../models/achievements.model';
 import { ApiError } from '../shared/error/ApiError';
 import { AppFiles } from '../models/files.model';
 import { Group } from '../models/group.model';
@@ -10,6 +12,7 @@ import { RolePermission } from "../models/role-permissions.model";
 import { RoleService } from './role.service';
 import { Subject } from '../models/subject.model';
 import { TemporaryLink } from '../models/tmp-links.model';
+import { UserAchievement } from '../models/user-achievements.model';
 import { UserComment } from '../models/user-comments.model';
 import { UserRole } from "../models/user-roles.model";
 import { UserSetting } from '../models/user-settings.model';
@@ -167,8 +170,39 @@ class UserService {
     }
   }
 
+  async seenGuideLine(userId: number) {
+    try {
+      await Log.create({ userId, type: LogType.readGuide, isPublic: true });
+      return true;
+    }
+    catch (e) {
+      console.log(e);
+      throw 'Не удалось отметить прочтение гайдлайна';
+    }
+  }
+
   async getMe(id: number) {
-    return await User.findByPk(id, { include: [ { model: UserRole, include: [ RolePermission ] }, Group, UserSetting ] });
+    try {
+      return await User.findByPk(id, {
+        
+        include: [
+          { model: UserRole,
+            include: [ RolePermission ]
+          },
+          Group,
+          UserSetting,
+          {
+            model: UserAchievement,
+            include: [
+              Achievement
+            ]
+          }
+        ] });
+    }
+    catch (e) {
+      console.log(e);
+      throw 'Не удалось получить пользователя';
+    }
   }
 
   // TODO: why two similar methods??
@@ -256,6 +290,24 @@ class UserService {
 
     await tokenService.saveToken(user!.id, tokens.refreshToken);
     return { ...tokens, user: user! };
+  }
+
+  async update(dto: {
+    avatarUrl: string;
+    nickname: string;
+    firstName: string;
+    lastName: string;
+    phone: string;
+  }, userId: number) {
+    console.log(dto);
+    const user = await User.findByPk(userId);
+    if (!user) throw 'Такой пользователь не найден';
+    user.avatarUrl = dto.avatarUrl;
+    user.nickname = dto.nickname;
+    user.firstName = dto.firstName;
+    user.lastName = dto.lastName;
+    user.phone = dto.phone;
+    return await user.save();
   }
 
   async passRecovery({ email }: {email: string}) {

@@ -38,7 +38,8 @@ class AchievementsLogService {
    * Смотрим, не получил ли пользователь достижение, связанное с частотой захода в приложение
    */
   async checkForAchievementByEntrance(userId: number) {
-    if(!(await this.isGuideSeen(userId))) return; // просто чтобы не спамить. Выдадим достижение после прохождения туториала.
+    const guideSeen = await Log.findOne({ where: { userId, type: LogType.readGuide } });
+    if(!guideSeen) return; // просто чтобы не спамить. Выдадим достижение после прохождения туториала.
 
     const entrances = await Log.findAndCountAll({ where: { userId, type: LogType.entrance } });
     const count = entrances.count;
