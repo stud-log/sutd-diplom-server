@@ -14,3 +14,6 @@ src/static/**/*.svg
 src/static/**/*.gif
 src/static/**/*.xlsx
 src/static/**/*.csv
+
+!src/static/_defaults/**/*
+!src/static/mail/*

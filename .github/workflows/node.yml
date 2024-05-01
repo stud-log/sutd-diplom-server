@@ -1,0 +1,26 @@
+name: Node.js CI/CD
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' # we tell Github to only execute this step if we're on our master branch (so we don't put unfinished branches in production)
+    steps:
+      - name: Deploying to server
+        uses: appleboy/ssh-action@master # An action made to control Linux servers
+
+        with: # We set all our secrets here for the action, these won't be shown in the action logs
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          script: |
+            cd www/api.studlog.ru # we move into our app's folder
+            git pull "https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com//stud-log/sutd-diplom-server.git"
+            npm prune # we remove any unused dependencies
+            npm install # we install any missing dependencies
+            npm run build # we build our app
+            pm2 reload server # we reload the app via PM2
