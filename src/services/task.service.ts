@@ -2,11 +2,17 @@ import { UserTask, UserTaskStatus } from "../models/user-tasks.model";
 
 class TaskService {
 
-  async changeHomeworkStatus ( dto: {recordId: number; status: UserTaskStatus} , userId: number) {
+  async changeHomeworkStatus ( dto: {recordId: number; status: UserTaskStatus}, userId: number, groupId: number) {
     try {
       const existedTask = await UserTask.findOne({ where: { recordId: dto.recordId, userId } });
       if(!existedTask) {
-        return await UserTask.create({ recordId: dto.recordId, userId, status: UserTaskStatus.inProgress });
+        return await UserTask.create({
+          recordId: dto.recordId,
+          userId,
+          groupId,
+          status: UserTaskStatus.inProgress,
+          myRecordId: dto.recordId // will be overwritten after create like in comments
+        });
       }
       existedTask.status = dto.status;
       return await existedTask.save();

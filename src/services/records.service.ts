@@ -113,6 +113,10 @@ class RecordService {
                   {
                     model: UserReaction,
                     required: false
+                  },
+                  {
+                    model: AppFiles,
+                    required: false
                   }
                 ],
               },
@@ -137,6 +141,10 @@ class RecordService {
                     include: [
                       {
                         model: UserReaction,
+                        required: false
+                      },
+                      {
+                        model: AppFiles,
                         required: false
                       }
                     ],

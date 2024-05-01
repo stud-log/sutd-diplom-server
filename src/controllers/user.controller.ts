@@ -14,6 +14,26 @@ class UserController {
       .catch(err => next(ApiError.badRequest(err)));
   };
 
+  myTasks = async (req: Request, res: Response, next: NextFunction) => {
+    return await userService
+      .myTasks((req as IUserReq).user.id)
+      .then(post => res.json(post))
+      .catch(err => next(ApiError.badRequest(err)));
+  };
+
+  getTask = async (req: Request, res: Response, next: NextFunction) => {
+    const taskId = Number(req.query.taskId);
+    if(taskId && !isNaN(taskId)){
+      return await userService
+        .getTask(taskId)
+        .then(post => res.json(post))
+        .catch(err => next(ApiError.badRequest(err)));
+    }
+    else {
+      return next(ApiError.badRequest('Missing param'));
+    }
+  };
+
   getAll = async (req: Request, res: Response, next: NextFunction) => {
     return await userService
       .getAll()

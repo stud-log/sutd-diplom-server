@@ -43,14 +43,14 @@ export class UserComment extends Model<UserComment, UserCommentAttrs> {
   @Column({ allowNull: false })
     myRecordId: number;
   
-  @BelongsTo(() => Record, { as: 'myRecord' })
+  @BelongsTo(() => Record, { as: 'myRecord', foreignKey: 'myRecordId' })
     myRecord: Record;
 
   @ForeignKey(() => Record)
   @Column({ allowNull: false })
     recordId: number;
   
-  @BelongsTo(() => Record, { as: 'record' })
+  @BelongsTo(() => Record, { as: 'record', foreignKey: 'recordId' })
     record: Record;
 
   @Column({ allowNull: true })

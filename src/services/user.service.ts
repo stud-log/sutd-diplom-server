@@ -2,12 +2,18 @@ import { LoginDTO, RegDTO, ResetPasswordDTO } from '@stud-log/news-types/dto';
 import { User, UserStatus } from "../models/user.model";
 
 import { ApiError } from '../shared/error/ApiError';
+import { AppFiles } from '../models/files.model';
 import { Group } from '../models/group.model';
+import { Homework } from '../models/homeworks.model';
+import { Record } from '../models/records.model';
 import { RolePermission } from "../models/role-permissions.model";
 import { RoleService } from './role.service';
+import { Subject } from '../models/subject.model';
 import { TemporaryLink } from '../models/tmp-links.model';
+import { UserComment } from '../models/user-comments.model';
 import { UserRole } from "../models/user-roles.model";
 import { UserSetting } from '../models/user-settings.model';
+import { UserTask } from '../models/user-tasks.model';
 import bcrypt from 'bcryptjs';
 import groupService from "./group.service";
 import { mailRecoveryTemplate } from '../shared/templates/mail/recovery.template';
@@ -20,6 +26,145 @@ class UserService {
 
   async getAll() {
     return await User.findAll();
+  }
+
+  /**
+   * __NOTE__:
+   * Если заполнены поля задачи, и указано recordId - это значит, что мы создали свою задачу рамках какой то record сущности. Предполагается, что в рамках сущности teams.
+   * Если заполнено только recordId, значит мы просто взяли домашку в работу.
+   * Если же задача полностью кастомная, то recordId вообще не будет.
+   * Если заполнено parentId, то задача является зависимой от указанной задачи. parentId обязательно ссылается только на UserTask, чем бы он ни был
+   */
+  async myTasks(id: number) {
+    try {
+      return await UserTask.findAll({
+        where: {
+          userId: id,
+        },
+        include: [
+          {
+            model: Record,
+            required: false,
+            as: 'record',
+            /** если найдется, будет значить, что это домашка, взятая в работу */
+            include: [
+              {
+                model: Homework,
+                include: [
+                  Subject,
+                  {
+                    model: Record,
+                    required: false,
+                    include: [
+                      AppFiles
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            model: Record,
+            required: false,
+            as: 'myRecord',
+            /** нужно для того чтобы прицепить комментарии. а точнее заметки(!) */
+            include: [
+              {
+                model: UserComment,
+                required: false,
+                include: [
+                  {
+                    model: Record,
+                    required: false,
+                    as: 'myRecord',
+                    include: [
+                      AppFiles
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            model: UserTask,
+            required: false,
+            as: 'children'
+          }
+        ]
+      });
+    }
+    catch(e) {
+      console.log(e);
+      throw 'Ошибка при получении данных';
+    }
+  }
+
+  async getTask(taskId: number) {
+    try {
+      return await UserTask.findOne({
+        where: {
+          id: taskId
+        },
+        include: [
+          {
+            model: Record,
+            required: false,
+            as: 'record',
+            /** если найдется, будет значить, что это домашка, взятая в работу */
+            include: [
+              {
+                model: Homework,
+                include: [
+                  Subject,
+                  {
+                    model: Record,
+                    required: false,
+                    include: [
+                      AppFiles
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            model: Record,
+            required: false,
+            as: 'myRecord',
+            /** нужно для того чтобы прицепить комментарии. а точнее заметки(!) */
+            include: [
+              {
+                model: UserComment,
+                required: false,
+                include: [
+                  {
+                    model: User,
+                    include: [ UserSetting ]
+                  },
+                  {
+                    model: Record,
+                    required: false,
+                    as: 'myRecord',
+                    include: [
+                      AppFiles
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            model: UserTask,
+            required: false,
+            as: 'children'
+          }
+        ]
+      });
+    }
+    catch(e) {
+      console.log(e);
+      throw 'Ошибка при получении данных';
+    }
   }
 
   async getMe(id: number) {

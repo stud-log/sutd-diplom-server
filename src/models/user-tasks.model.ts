@@ -1,4 +1,4 @@
-import { BelongsTo, Column, DataType, ForeignKey, HasMany, HasOne, Model, Table } from 'sequelize-typescript';
+import { AfterCreate, BelongsTo, Column, DataType, ForeignKey, HasMany, HasOne, Model, Table } from 'sequelize-typescript';
 
 import { Group } from './group.model';
 import { Record } from './records.model';
@@ -20,6 +20,7 @@ interface UserTaskAttrs {
   description?: string;
   trackedTime?: number;
   doneDate?: string;
+  myRecordId: number;
 }
 
 /**
@@ -33,6 +34,11 @@ interface UserTaskAttrs {
  * -userId, при указанном recordId имеет смысл "исполнитель задачи"
  * -описание может быть не заполнено
  *
+ * __NOTE__:
+ * Если заполнены поля задачи, и указано recordId - это значит, что мы создали свою задачу рамках какой то record сущности. Предполагается, что в рамках сущности teams.
+ * Если заполнено только recordId, значит мы просто взяли домашку в работу.
+ * Если же задача полностью кастомная, то recordId вообще не будет.
+ * Если заполнено parentId, то задача является зависимой от указанной задачи. parentId обязательно ссылается только на UserTask, чем бы он ни был
  */
 @Table({ tableName: 'UserTasks' })
 export class UserTask extends Model<UserTask, UserTaskAttrs> {
@@ -54,11 +60,21 @@ export class UserTask extends Model<UserTask, UserTaskAttrs> {
     group: Group;
 
   @ForeignKey(() => Record)
-  @Column({ allowNull: true })
-    recordId: number;
+  @Column({ allowNull: false })
+    myRecordId: number;
+    
+  @BelongsTo(() => Record, { as: 'myRecord', foreignKey: 'myRecordId' })
+    myRecord: Record;
   
-  @BelongsTo(() => Record)
+  @ForeignKey(() => Record)
+  @Column({ allowNull: false })
+    recordId: number;
+    
+  @BelongsTo(() => Record, { as: 'record', foreignKey: 'recordId' })
     record: Record;
+
+  @Column({ allowNull: true })
+    parentId: number;
 
   @Column({ allowNull: true })
     title: string;
@@ -72,8 +88,31 @@ export class UserTask extends Model<UserTask, UserTaskAttrs> {
   @Column({ allowNull: false })
     status: string;
 
+  /** Когда задачу выполнили */
   @Column({ allowNull: true })
     doneDate: string;
 
-//TODO: добавить как сущность рекорда, чтобы можно было оставлять к задаче комментарии
+  /**Дедлайн  */
+  @Column({ allowNull: true })
+    endDate: string;
+
+  @BelongsTo(() => UserTask, {
+    as: 'parent',
+    foreignKey: 'parentId',
+    targetKey: 'id',
+  })
+    parent: UserTask;
+  
+  @HasMany(() => UserTask, {
+    as: 'children',
+    foreignKey: 'parentId',
+  })
+    children: UserTask[];
+
+  @AfterCreate({})
+  static async createRecord(instance: UserTask) {
+    const record = await Record.create({ recordTable: 'UserTask', recordId: instance.id, groupId: instance.groupId });
+    instance.myRecordId = record.id;
+    await instance.save();
+  }
 }

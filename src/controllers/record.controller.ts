@@ -176,7 +176,7 @@ class RecordController {
     if(recordId) {
       if(!isNaN(Number(recordId))){
         return await taskService
-          .changeHomeworkStatus(req.body, (req as IUserReq).user.id)
+          .changeHomeworkStatus(req.body, (req as IUserReq).user.id, (req as IUserReq).user.groupId)
           .then(post => res.json(post))
           .catch(err => {
             return next(ApiError.badRequest(err));
