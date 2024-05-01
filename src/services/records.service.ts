@@ -18,6 +18,7 @@ import { UserTask } from "../models/user-tasks.model";
 import { UserTaskStatus } from './../models/user-tasks.model';
 import { UserView } from "../models/user-views.model";
 import em from './event-emmiter';
+import { extractPathFromUrl } from "../shared/utils/fixPathFiles";
 import fs from 'fs';
 import path from 'path';
 import { sequelize } from "../db";
@@ -254,7 +255,7 @@ class RecordService {
           post.content = dto.content;
           post.label = dto.label;
           if(files && files['cover']) {
-            post.coverImage = files['cover'].at(0)?.path?.split('src\\static')?.pop() || '';
+            post.coverImage = files['cover'].at(0)?.path ? '/' + extractPathFromUrl(files['cover'].at(0)!.path!) : '';
           }
 
           await post.save();
@@ -289,7 +290,7 @@ class RecordService {
               recordId: record.id,
               fileName: file.originalname,
               fileSize: file.size,
-              url: file.path.split('src\\static').pop() as string
+              url: '/' + extractPathFromUrl(file.path)
             });}));
         }
 
@@ -306,7 +307,7 @@ class RecordService {
             title: dto.title,
             content: dto.content,
             label: dto.label,
-            coverImage: files && files['cover'] ? files['cover']?.[0]?.path?.split('src\\static')?.pop() : undefined,
+            coverImage: files['cover'].at(0)?.path ? '/' + extractPathFromUrl(files['cover'].at(0)!.path!) : '',
           });
         }
         else {
@@ -330,7 +331,7 @@ class RecordService {
             recordId: _record.id,
             fileName: file.originalname,
             fileSize: file.size,
-            url: file.path.split('src\\static').pop() as string
+            url: '/' + extractPathFromUrl(file.path)
           })));
         }
 
