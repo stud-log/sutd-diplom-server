@@ -41,7 +41,7 @@ const createDefaultRecords = async () => {
   await RolePermission.findOrCreate({ where: { roleId: mentorRole.id }, defaults: { roleId: mentorRole.id, canEdit: true, canInvite: true } });
 
   /** Create default achievements */
-  await Achievement.bulkCreate(defaultAchievements);
+  // await Achievement.bulkCreate(defaultAchievements);
 };
 
 const start = async () => {
