@@ -23,7 +23,7 @@ class StudLogEventEmitter {
   }
 
   subscribe(event: StudLogEvents, cb: (userId: number, data: any) => void) {
-    return this.eventEmitter.on(event, cb);
+    return this.eventEmitter.once(event, cb);
   }
 
   publish(event: StudLogEvents, userId: number, data: any) {
