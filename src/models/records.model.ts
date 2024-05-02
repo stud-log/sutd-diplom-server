@@ -63,7 +63,7 @@ export class Record extends Model<Record, RecordAttrs> {
   @HasMany(() => AppFiles)
     files: AppFiles[];
 
-  @HasMany(() => UserTask)
+  @HasMany(() => UserTask, { foreignKey: 'recordId' })
     userTasks: UserTask[];
 
   @HasMany(() => UserView)

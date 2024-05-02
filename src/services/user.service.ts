@@ -19,6 +19,7 @@ import { UserSetting } from '../models/user-settings.model';
 import { UserTask } from '../models/user-tasks.model';
 import bcrypt from 'bcryptjs';
 import groupService from "./group.service";
+import logService from './log.service';
 import { mailRecoveryTemplate } from '../shared/templates/mail/recovery.template';
 import mailService from './mail.service';
 import recoveryService from './recovery.service';
@@ -173,6 +174,7 @@ class UserService {
   async seenGuideLine(userId: number) {
     try {
       await Log.create({ userId, type: LogType.readGuide, isPublic: true });
+      await logService.checkForAchievementByEntrance(userId);
       return true;
     }
     catch (e) {

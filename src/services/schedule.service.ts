@@ -163,8 +163,8 @@ class ScheduleService {
   async getSchedule (groupId: number, wholeTable = false) {
     const currentDayOfWeek = moment().day();
     
-    const startDate = wholeTable ? null : moment().subtract(currentDayOfWeek - 1, 'days').toDate();
-    const endDate = wholeTable ? null : moment().add(7 - currentDayOfWeek, 'days').toDate();
+    const startDate = wholeTable ? null : moment().startOf('week').toDate();
+    const endDate = wholeTable ? null : moment().endOf('week').toDate();
 
     return await Record.findAll({
       where: {

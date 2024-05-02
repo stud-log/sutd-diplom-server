@@ -199,11 +199,11 @@ class RecordService {
 
   }
 
-  async getEntityUserTasks(recordTable: string, recordId: number, userId: number, groupId?: number) {
+  async getEntityUserTasks(recordId: number, userId: number, groupId?: number) {
     try {
     
       const record = await Record.findOne({
-        where: { recordTable, recordId },
+        where: { recordTable: 'Homework', recordId },
         include: [
           {
             model: UserTask,
@@ -216,7 +216,7 @@ class RecordService {
       });
 
       if(!record) throw 'Record not found';
-
+      
       return record.userTasks;
     }
     catch(e) {
