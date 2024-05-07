@@ -3,14 +3,14 @@ import { BelongsTo, Column, DataType, ForeignKey, HasMany, HasOne, Model, Table 
 import { Record } from './records.model';
 import { User } from './user.model';
 
-interface UserNotificationAttrs {
+export interface UserNotificationAttrs {
   id?: number;
   userId: number;
   recordId?: number;
   authorId: number;
   title: string;
   content: string;
-  isSeen: boolean;
+  isSeen?: boolean;
 }
 
 /**

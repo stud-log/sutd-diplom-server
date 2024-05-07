@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 
 import { ApiError } from "../shared/error/ApiError";
 import { IUserReq } from "../shared/interfaces/req";
+import achievementService from "../services/achievement.service";
 import logService from "../services/log.service";
 import userService from "../services/user.service";
 
@@ -71,7 +72,7 @@ class UserController {
     try {
       const userData = await userService.login(req.body);
       res.cookie('refreshToken', userData.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true });
-      logService.userEnter(userData.user.id);
+      logService.userEnter(userData.user.id, req.app.get('io'));
       return res.json(userData);
     } catch (e) {
       console.log(e);
@@ -96,7 +97,8 @@ class UserController {
       const { refreshToken } = req.cookies;
       const userData = await userService.refresh(refreshToken);
       res.cookie('refreshToken', userData.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true });
-      logService.userEnter(userData.user.id);
+      logService.userEnter(userData.user.id, req.app.get('io'));
+      
       return res.json(userData);
     } catch (e) {
       console.log(e);
@@ -140,7 +142,11 @@ class UserController {
     
     return await userService
       .seenGuideLine((req as IUserReq).user.id)
-      .then(resp => res.json(resp))
+      .then(resp => {
+        // исключение. ачивки должны проверятся из logService
+        achievementService.checkForAchievementByEntrance((req as IUserReq).user.id, req.app.get('io'));
+        return res.json(resp);
+      })
       .catch(err => next(ApiError.badFormData(err)));
     
   };

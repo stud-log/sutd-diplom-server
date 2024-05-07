@@ -136,7 +136,7 @@ class RecordController {
     if(recordId) {
       if(!isNaN(Number(recordId))){
         return await recordService
-          .comment(req, (req as IUserReq).user.id, (req as IUserReq).user.groupId)
+          .comment(req, (req as IUserReq).user.id, (req as IUserReq).user.groupId, req.app.get('io'))
           .then(post => res.json(post))
           .catch(err => {
             return next(ApiError.badRequest(err));

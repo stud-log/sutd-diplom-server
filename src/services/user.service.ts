@@ -174,7 +174,6 @@ class UserService {
   async seenGuideLine(userId: number) {
     try {
       await Log.create({ userId, type: LogType.readGuide, isPublic: true });
-      await logService.checkForAchievementByEntrance(userId);
       return true;
     }
     catch (e) {

@@ -1,7 +1,6 @@
 import { Router } from 'express';
 import { achievementRouter } from './achievement.router';
 import { adminRouter } from './admin.router';
-import { eventsRouter } from './events.router';
 import { groupRouter } from './group.router';
 import { recordRouter } from './record.router';
 import { scheduleRouter } from './schedule.router';
@@ -18,7 +17,6 @@ router.use('/subjects', subjectRouter);
 router.use('/admin', adminRouter);
 router.use('/record', recordRouter);
 router.use('/uploads', uploadsRouter);
-router.use('/events', eventsRouter);
 router.use('/achievements', achievementRouter);
 
 export { router };
