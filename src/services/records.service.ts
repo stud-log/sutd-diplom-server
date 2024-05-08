@@ -533,11 +533,17 @@ class RecordService {
     return records;
   }
 
-  async react ( dto: {recordId: number; type: string; imageUrl: string}, userId: number) {
+  async react ( dto: {recordId: number; type: string; imageUrl: string}, userId: number, io: Server) {
     try {
+      const record = await Record.findByPk(dto.recordId);
+      if(!record) throw 'Record not found';
+
       const exitedReaction = await UserReaction.findOne({ where: { userId, recordId: dto.recordId } });
       if(exitedReaction) {
         if(exitedReaction.type == dto.type) {
+          if(record.recordTable == 'UserComment') {
+            logService.usingAchievement('userReacted', userId, io, record.id, 'destroy');
+          }
           return await exitedReaction.destroy();
         }
         exitedReaction.type = dto.type;
@@ -545,12 +551,16 @@ class RecordService {
         return await exitedReaction.save();
         
       }
+      if(record.recordTable == 'UserComment') {
+        logService.usingAchievement('userReacted', userId, io, record.id, 'create');
+      }
       return await UserReaction.create({
         userId,
         type: dto.type,
         imageUrl: dto.imageUrl,
         recordId: dto.recordId
       }, { returning: true });
+      
     }
     catch (err) {
       console.log(err);
@@ -615,7 +625,8 @@ class RecordService {
 
       });
       if(!comment) throw 'Комментарий не создан';
-
+      logService.usingAchievement('userCommented', userId, io);
+      
       if(comment.replyToUserId) {
         /**Создаем уведомление для пользователя, которому ответили на комментарий */
         const currentComment = await UserComment.findByPk(comment.id, { include: [ User ] });
@@ -629,7 +640,7 @@ class RecordService {
             title: `Ответил(а) на Ваш комментарий`,
             userId: comment.replyToUserId,
           }, io);
-          logService.userCommented(userId, io);
+          
         }
       }
       const _record = await Record.findOne({ where: { recordTable: 'UserComment', recordId: comment.id } });

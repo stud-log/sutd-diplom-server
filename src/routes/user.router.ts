@@ -17,6 +17,8 @@ userRouter.get('/getTask', authMiddleware(), userController.getTask);
 userRouter.get('/notifications', authMiddleware(), userController.notifications);
 userRouter.get('/notifications/checkUnSeen', authMiddleware(), userController.checkUnSeen);
 userRouter.get('/notifications/markAsSeen', authMiddleware(), userController.markAsSeen);
+userRouter.get('/achievements/checkUnSeen', authMiddleware(), userController.checkUnSeenAchievements);
+userRouter.get('/achievements/markAsSeen', authMiddleware(), userController.markAsSeenAchievements);
 
 userRouter.get(
   '/:id',

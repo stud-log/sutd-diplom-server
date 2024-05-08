@@ -247,14 +247,14 @@ class UserService {
     const tokens = tokenService.generateTokens({ id: user.id, email: regDto.email, groupId: user!.groupId, permissions: role.permissions });
     await tokenService.saveToken(user.id, tokens.refreshToken);
 
-    const createdUser = await User.findByPk(user.id, { attributes: { exclude: [ 'password' ] } , include: [ { model: UserRole, include: [ RolePermission ] }, Group ] });
+    const createdUser = await User.findByPk(user.id, { attributes: { exclude: [ 'password' ] } , include: [ { model: UserRole, include: [ RolePermission ] }, Group, UserSetting ] });
 
     return { ...tokens, user: createdUser };
     
   }
 
   async login(loginDto: LoginDTO) {
-    const user = await User.findOne({ where: { email: loginDto.email.trim().toLowerCase() }, include: [ { model: UserRole, include: [ RolePermission ] }, Group ] });
+    const user = await User.findOne({ where: { email: loginDto.email.trim().toLowerCase() }, include: [ { model: UserRole, include: [ RolePermission ] }, Group, UserSetting ] });
 
     if (!user) throw 'Такой пользователь не зарегистрирован';
     const isPassEquals = await bcrypt.compare(loginDto.password, user.password);
@@ -286,7 +286,7 @@ class UserService {
     if (!userData || !tokenFromDb) {
       throw ApiError.unauthorizedError();
     }
-    const user = await User.findByPk(userData.id, { include: [ { model: UserRole, include: [ RolePermission ] }, Group ] });
+    const user = await User.findByPk(userData.id, { include: [ { model: UserRole, include: [ RolePermission ] }, Group, UserSetting ] });
     const tokens = tokenService.generateTokens({ id: user!.id, email: user!.email, groupId: user!.groupId, permissions: { canEdit: user!.role.permissions.canEdit, canInvite: user!.role.permissions.canInvite } });
 
     await tokenService.saveToken(user!.id, tokens.refreshToken);
@@ -299,16 +299,24 @@ class UserService {
     firstName: string;
     lastName: string;
     phone: string;
+    avatarColor: string;
   }, userId: number) {
-    console.log(dto);
+  
     const user = await User.findByPk(userId);
-    if (!user) throw 'Такой пользователь не найден';
+    const userSettings = await UserSetting.findOne({ where: { userId } });
+    if (!user || !userSettings) throw 'Такой пользователь не найден';
     user.avatarUrl = dto.avatarUrl;
     user.nickname = dto.nickname;
     user.firstName = dto.firstName;
     user.lastName = dto.lastName;
     user.phone = dto.phone;
-    return await user.save();
+    userSettings.nickColor = dto.avatarColor;
+    await userSettings.save();
+    await user.save();
+
+    const updatedUser = await User.findByPk(userId, { include: [ { model: UserRole, include: [ RolePermission ] }, Group, UserSetting ] });
+
+    return updatedUser;
   }
 
   async passRecovery({ email }: {email: string}) {

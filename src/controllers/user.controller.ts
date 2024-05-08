@@ -73,7 +73,7 @@ class UserController {
     try {
       const userData = await userService.login(req.body);
       res.cookie('refreshToken', userData.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true });
-      logService.userEnter(userData.user.id, req.app.get('io'));
+      logService.usingAchievement('userEnter', userData.user.id, req.app.get('io'));
       return res.json(userData);
     } catch (e) {
       console.log(e);
@@ -98,7 +98,7 @@ class UserController {
       const { refreshToken } = req.cookies;
       const userData = await userService.refresh(refreshToken);
       res.cookie('refreshToken', userData.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true });
-      logService.userEnter(userData.user.id, req.app.get('io'));
+      logService.usingAchievement('userEnter', userData.user.id, req.app.get('io'));
       
       return res.json(userData);
     } catch (e) {
@@ -145,7 +145,7 @@ class UserController {
       .seenGuideLine((req as IUserReq).user.id)
       .then(resp => {
         // исключение. ачивки должны проверятся из logService
-        achievementService.checkForAchievementByEntrance((req as IUserReq).user.id, req.app.get('io'));
+        achievementService.checkForAchievement((req as IUserReq).user.id, req.app.get('io'));
         return res.json(resp);
       })
       .catch(err => next(ApiError.badFormData(err)));
@@ -171,6 +171,24 @@ class UserController {
   };
 
   markAsSeen = async (req: Request, res: Response, next: NextFunction) => {
+    
+    return await notificationService
+      .markAsSeen((req as IUserReq).user.id, req.query.noteId as string)
+      .then(resp => res.json(resp))
+      .catch(err => next(ApiError.badFormData(err)));
+    
+  };
+  
+  checkUnSeenAchievements = async (req: Request, res: Response, next: NextFunction) => {
+    
+    return await notificationService
+      .checkUnSeen((req as IUserReq).user.id)
+      .then(resp => res.json(resp))
+      .catch(err => next(ApiError.badFormData(err)));
+    
+  };
+
+  markAsSeenAchievements = async (req: Request, res: Response, next: NextFunction) => {
     
     return await notificationService
       .markAsSeen((req as IUserReq).user.id, req.query.noteId as string)

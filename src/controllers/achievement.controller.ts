@@ -13,6 +13,13 @@ class AchievementController {
       .catch(err => next(ApiError.badRequest(err)));
   };
 
+  allWithProgress = async (req: Request, res: Response, next: NextFunction) => {
+    return await achievementService
+      .allWithProgress((req as IUserReq).user.id)
+      .then(post => res.json(post))
+      .catch(err => next(ApiError.badRequest(err)));
+  };
+
 }
 
 export default new AchievementController();

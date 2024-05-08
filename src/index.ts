@@ -17,6 +17,7 @@ import path from 'path';
 import { router } from './routes';
 import { sequelize } from './db';
 import { setupIOevents } from './shared/_defaults/soket.io.settings';
+import { updateOrCreate } from './shared/utils/updateOrCreate';
 
 const app = express();
 const server = http.createServer(app); // Create an HTTP server
@@ -63,7 +64,10 @@ const createDefaultRecords = async () => {
   await RolePermission.findOrCreate({ where: { roleId: mentorRole.id }, defaults: { roleId: mentorRole.id, canEdit: true, canInvite: true } });
 
   /** Create default achievements */
-  // await Achievement.bulkCreate(defaultAchievements);
+  
+  await Promise.all(defaultAchievements.map(async (achievement) => {
+    return updateOrCreate(Achievement, { where: { title: achievement.title }, defaults: { ...achievement } });
+  }));
 
   /** Create system account */
   const [ systemGroup ] = await Group.findOrCreate({ where: { name: "Stud.log" }, defaults: { name: "Stud.log" } });

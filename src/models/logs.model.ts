@@ -6,12 +6,14 @@ import { User } from './user.model';
 export enum LogType {
   entrance = 'entrance',
   comment = 'comment',
+  myCommentReacted = 'myCommentReacted',
   edit = 'edit',
   create = 'create',
   service = 'service',
   readGuide = 'readGuide',
   nonAttendance = 'nonAttendance',
   nonPassedHomeworks = 'nonPassedHomeworks',
+  gotAchievement = 'gotAchievement',
 
 }
 
@@ -22,6 +24,7 @@ interface LogAttrs {
   content?: string;
   isPublic: boolean;
   type: LogType;
+  isSeen?: boolean;
 }
 /**
 * Используется для логов и в качестве фиксации событий для достижений.
@@ -55,5 +58,8 @@ export class Log extends Model<Log, LogAttrs> {
 
   @Column({ allowNull: false, defaultValue: LogType.service })
     type: string;
+
+  @Column({ allowNull: true, defaultValue: false })
+    isSeen: boolean;
   
 }
