@@ -19,6 +19,7 @@ userRouter.get('/notifications/checkUnSeen', authMiddleware(), userController.ch
 userRouter.get('/notifications/markAsSeen', authMiddleware(), userController.markAsSeen);
 userRouter.get('/achievements/checkUnSeen', authMiddleware(), userController.checkUnSeenAchievements);
 userRouter.get('/achievements/markAsSeen', authMiddleware(), userController.markAsSeenAchievements);
+userRouter.get('/statistic/hw', authMiddleware(), userController.hwStats);
 
 userRouter.get(
   '/:id',

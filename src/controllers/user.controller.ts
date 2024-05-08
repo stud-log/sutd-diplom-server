@@ -5,6 +5,7 @@ import { IUserReq } from "../shared/interfaces/req";
 import achievementService from "../services/achievement.service";
 import logService from "../services/log.service";
 import notificationService from "../services/notification.service";
+import statisticService from "../services/statistic.service";
 import userService from "../services/user.service";
 
 class UserController {
@@ -192,6 +193,15 @@ class UserController {
     
     return await notificationService
       .markAsSeen((req as IUserReq).user.id, req.query.noteId as string)
+      .then(resp => res.json(resp))
+      .catch(err => next(ApiError.badFormData(err)));
+    
+  };
+
+  hwStats = async (req: Request, res: Response, next: NextFunction) => {
+    
+    return await statisticService
+      .hwStats((req as IUserReq).user.id)
       .then(resp => res.json(resp))
       .catch(err => next(ApiError.badFormData(err)));
     
