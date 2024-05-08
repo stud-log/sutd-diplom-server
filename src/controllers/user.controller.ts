@@ -4,6 +4,7 @@ import { ApiError } from "../shared/error/ApiError";
 import { IUserReq } from "../shared/interfaces/req";
 import achievementService from "../services/achievement.service";
 import logService from "../services/log.service";
+import notificationService from "../services/notification.service";
 import userService from "../services/user.service";
 
 class UserController {
@@ -147,6 +148,33 @@ class UserController {
         achievementService.checkForAchievementByEntrance((req as IUserReq).user.id, req.app.get('io'));
         return res.json(resp);
       })
+      .catch(err => next(ApiError.badFormData(err)));
+    
+  };
+
+  notifications = async (req: Request, res: Response, next: NextFunction) => {
+    
+    return await notificationService
+      .getUserNotifications((req as IUserReq).user.id)
+      .then(resp => res.json(resp))
+      .catch(err => next(ApiError.badFormData(err)));
+    
+  };
+
+  checkUnSeen = async (req: Request, res: Response, next: NextFunction) => {
+    
+    return await notificationService
+      .checkUnSeen((req as IUserReq).user.id)
+      .then(resp => res.json(resp))
+      .catch(err => next(ApiError.badFormData(err)));
+    
+  };
+
+  markAsSeen = async (req: Request, res: Response, next: NextFunction) => {
+    
+    return await notificationService
+      .markAsSeen((req as IUserReq).user.id, req.query.noteId as string)
+      .then(resp => res.json(resp))
       .catch(err => next(ApiError.badFormData(err)));
     
   };

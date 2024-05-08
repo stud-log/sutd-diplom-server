@@ -70,7 +70,7 @@ const createDefaultRecords = async () => {
   const systemAcc = await User.findOne({ where: { firstName: "Система", lastName: 'Stud.log' } });
   if(!systemAcc) {
     await User.create({
-      firstName: "Система",
+      firstName: "",
       lastName: 'Stud.log',
       roleId: mentorRole.id,
       groupId: systemGroup.id,

@@ -14,6 +14,9 @@ userRouter.get('/me', authMiddleware(), userController.getMe);
 userRouter.get('/checkGuide', authMiddleware(), userController.isGuideSeen);
 userRouter.get('/myTasks', authMiddleware(), userController.myTasks);
 userRouter.get('/getTask', authMiddleware(), userController.getTask);
+userRouter.get('/notifications', authMiddleware(), userController.notifications);
+userRouter.get('/notifications/checkUnSeen', authMiddleware(), userController.checkUnSeen);
+userRouter.get('/notifications/markAsSeen', authMiddleware(), userController.markAsSeen);
 
 userRouter.get(
   '/:id',

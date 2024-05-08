@@ -26,7 +26,7 @@ export class UserNotification extends Model<UserNotification, UserNotificationAt
   @Column({ allowNull: false })
     userId: number;
   
-  @BelongsTo(() => User)
+  @BelongsTo(() => User, { foreignKey: 'userId' })
     user: User;
 
   @ForeignKey(() => Record)
@@ -40,7 +40,7 @@ export class UserNotification extends Model<UserNotification, UserNotificationAt
   @Column({ allowNull: false })
     authorId: number;
     
-  @BelongsTo(() => User)
+  @BelongsTo(() => User, { foreignKey: 'authorId' })
     author: User;
 
   @Column({ allowNull: false })

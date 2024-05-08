@@ -61,6 +61,8 @@ class RecordController {
           Number(req.query.subjectId),
           req.query.label as string,
           req.query.favorites as string,
+          req.query.deadlineDateSort as string,
+          req.query.publishDateSort as string,
         )
         .then(post => res.json(post))
         .catch(err => {

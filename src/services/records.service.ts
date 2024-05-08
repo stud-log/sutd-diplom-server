@@ -5,6 +5,7 @@ import { Calendar } from "../models/calendar.model";
 import { IUserReq } from "../shared/interfaces/req";
 import { Log } from "../models/logs.model";
 import { News } from "../models/news.model";
+import { Order } from "sequelize";
 import { Record } from "../models/records.model";
 import { Request } from "express";
 import { Server } from "socket.io";
@@ -23,6 +24,7 @@ import { UserView } from "../models/user-views.model";
 import { extractPathFromUrl } from "../shared/utils/fixPathFiles";
 import fs from 'fs';
 import logService from "./log.service";
+import moment from "moment";
 import notificationService from "./notification.service";
 import path from 'path';
 import { sequelize } from "../db";
@@ -364,7 +366,10 @@ class RecordService {
     subjectId?: number,
     label?: string,
     favorites?: string,
+    deadlineDateSort?: string,
+    publishDateSort?: string,
   ){
+    
     const Entity =
     recordTable == 'News' ? News :
       recordTable == 'Homework' ? Homework :
@@ -380,6 +385,7 @@ class RecordService {
       },
       offset: offset,
       limit: limit,
+      ...(publishDateSort && publishDateSort !== 'none' ? { order: [ [ 'createdAt', publishDateSort ] ] } : {}),
       attributes: {
         include: [
           [ sequelize.literal(`(
@@ -506,6 +512,23 @@ class RecordService {
         },
       ]
     });
+
+    if(recordTable == 'Homework' && deadlineDateSort && deadlineDateSort !== 'none' ) {
+      records.rows.sort((a, b) => {
+        const deadlineA = moment(a.homework.endDate);
+        const deadlineB = moment(b.homework.endDate);
+        // Compare deadline dates
+        if (deadlineA.isBefore(moment(), 'day') && deadlineB.isBefore(moment(), 'day')) {
+          return 0; // If both are before today, maintain their current order
+        } else if (deadlineA.isBefore(moment(), 'day')) {
+          return 1; // If only a is before today, b should come first
+        } else if (deadlineB.isBefore(moment(), 'day')) {
+          return -1; // If only b is before today, a should come first
+        } else {
+          return deadlineDateSort === 'ASC' ? deadlineA.diff(deadlineB) : deadlineB.diff(deadlineA);
+        }
+      });
+    }
     
     return records;
   }
@@ -599,10 +622,11 @@ class RecordService {
 
         if(currentComment && currentComment.userId !== comment.replyToUserId) {
           // сами себе не создаем уведомление ^
-          await notificationService.createNoteFromSystem({
+          await notificationService.createNote({
             recordId: comment.recordId,
             content: comment.content,
-            title: `${currentComment?.user.firstName} ответил на Ваш комментарий`,
+            authorId: currentComment.user.id,
+            title: `Ответил(а) на Ваш комментарий`,
             userId: comment.replyToUserId,
           }, io);
           logService.userCommented(userId, io);
