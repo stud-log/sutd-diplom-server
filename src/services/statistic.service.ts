@@ -18,7 +18,8 @@ class StatisticService {
         ]
       });
       if(!user) throw 'Cannot find user';
-      const userHwTasks = user.tasks.filter(task => task.record.recordTable == 'Homework');
+      console.log(user.tasks);
+      const userHwTasks = user.tasks.filter(task => task.record?.recordTable == 'Homework');
       const totalHws = await Homework.count({ where: { groupId: user.groupId } });
       const stats = {
         total: totalHws,
@@ -29,7 +30,7 @@ class StatisticService {
       };
       return ({
         ...stats,
-        unTaken: stats.total - /*stats.feedback*/ stats.inProgress - stats.passed
+        unTaken: stats.total - stats.feedback - stats.inProgress - stats.passed
       });
     }
     catch(e) {

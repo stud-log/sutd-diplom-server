@@ -3,6 +3,8 @@ import { body, param } from "express-validator";
 import { Router } from "express";
 import { adminMiddleware } from "../middleware/admin.middleware";
 import { authMiddleware } from "../middleware/auth.middleware";
+import { checkUploadPath } from "../middleware/check-upload-path.middleware";
+import { uploadFiles } from "../middleware/upload-many-files.middleware";
 import userController from "../controllers/user.controller";
 import { validateRequestMiddleware } from "../middleware/validate-request.middleware";
 
@@ -69,5 +71,7 @@ userRouter.post(
 userRouter.post('/update', authMiddleware(), userController.update);
 userRouter.post('/manage', authMiddleware({ canInvite: true }), userController.manageAccount);
 userRouter.post('/seenGuideline', authMiddleware(), userController.seenGuideLine);
+
+userRouter.post('/notifications/updateOrCreate', authMiddleware(), checkUploadPath('tasks'), uploadFiles([ 'files' ], 'tasks', 20), userController.updateOrCreateNotification);
 
 export { userRouter };

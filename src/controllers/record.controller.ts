@@ -173,23 +173,14 @@ class RecordController {
    
   };
 
-  changeHomeworkStatus = async (req: Request, res: Response, next: NextFunction) => {
-    const { recordId } = req.body;
-    if(recordId) {
-      if(!isNaN(Number(recordId))){
-        return await taskService
-          .changeHomeworkStatus(req.body, (req as IUserReq).user.id, (req as IUserReq).user.groupId)
-          .then(post => res.json(post))
-          .catch(err => {
-            return next(ApiError.badRequest(err));
-          });
-      }
-      else {
-        return next(ApiError.badRequest('Params invalid'));
-      }
-    }
+  changeStatus = async (req: Request, res: Response, next: NextFunction) => {
     
-    return next(ApiError.badRequest('Params missing'));
+    return await taskService
+      .changeStatus(req.body, (req as IUserReq).user.id, (req as IUserReq).user.groupId)
+      .then(post => res.json(post))
+      .catch(err => {
+        return next(ApiError.badRequest(err));
+      });
    
   };
 

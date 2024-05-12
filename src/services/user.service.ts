@@ -137,6 +137,7 @@ class UserService {
             as: 'myRecord',
             /** нужно для того чтобы прицепить комментарии. а точнее заметки(!) */
             include: [
+              AppFiles,
               {
                 model: UserComment,
                 required: false,

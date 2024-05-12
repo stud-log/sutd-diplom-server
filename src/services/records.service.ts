@@ -37,7 +37,8 @@ class RecordService {
     recordTable == 'News' ? News :
       recordTable == 'Homework' ? Homework :
         recordTable == 'Calendar' ? Calendar :
-          Team;
+          recordTable == 'UserTask' ? UserTask :
+            Team;
 
       const record = await Record.findOne({
         where: { recordTable, recordId },
@@ -99,7 +100,9 @@ class RecordService {
         order: [ [ { model: UserComment, as: 'comments' }, { model: UserComment, as: 'children' }, 'createdAt', 'ASC' ] ],
         include: [
           {
-            model: Entity,
+            
+            ...(recordTable == 'UserTask' ? { model: UserTask, as: 'userTask' } : { model: Entity }),
+
             ...(recordTable == 'Homework' ? { include: [
               Subject
             ] } : {}),
@@ -191,6 +194,7 @@ class RecordService {
           },
           {
             model: UserTask,
+            as: 'userTasks',
             where: { userId },
             required: false
           }
@@ -217,6 +221,7 @@ class RecordService {
           {
             model: UserTask,
             required: false,
+            as: 'userTasks',
             include: [
               { model: User, include: [ UserSetting ] }
             ]
