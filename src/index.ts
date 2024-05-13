@@ -25,6 +25,7 @@ const io = new Server(server, {
   cors: {
     origin: [
       process.env.FRONTEND_URL as string,
+      'https://promo.studlog.ru',
       '*'
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
@@ -37,6 +38,7 @@ app.use(
   cors({
     origin: [
       process.env.FRONTEND_URL as string,
+      'https://promo.studlog.ru',
       '*'
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
@@ -71,7 +73,7 @@ const createDefaultRecords = async () => {
 
   /** Create system account */
   const [ systemGroup ] = await Group.findOrCreate({ where: { name: "Stud.log" }, defaults: { name: "Stud.log" } });
-  const systemAcc = await User.findOne({ where: { firstName: "Система", lastName: 'Stud.log' } });
+  const systemAcc = await User.findOne({ where: { lastName: 'Stud.log' } });
   if(!systemAcc) {
     await User.create({
       firstName: "",
