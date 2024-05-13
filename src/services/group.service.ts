@@ -1,12 +1,13 @@
 import { User, UserStatus } from "../models/user.model";
 
 import { Group } from "../models/group.model";
+import { Op } from "sequelize";
 import { UserSetting } from "../models/user-settings.model";
 
 class GroupService {
 
   async getAll() {
-    return await Group.findAll();
+    return await Group.findAll({ where: { name: { [Op.not]: 'Stud.log' } } });
   }
 
   async getByPK(id: number) {

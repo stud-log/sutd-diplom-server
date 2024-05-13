@@ -4,6 +4,7 @@ import { authMiddleware } from "../middleware/auth.middleware";
 
 const achievementRouter = Router();
 
-achievementRouter.get('/all', authMiddleware({ canInvite: true }), achievementController.all);
+achievementRouter.get('/all', authMiddleware(), achievementController.all);
+achievementRouter.get('/allWithProgress', authMiddleware(), achievementController.allWithProgress);
 
 export { achievementRouter };

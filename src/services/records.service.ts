@@ -3,23 +3,29 @@ import { Homework, HomeworkType } from "../models/homeworks.model";
 import { AppFiles } from "../models/files.model";
 import { Calendar } from "../models/calendar.model";
 import { IUserReq } from "../shared/interfaces/req";
+import { Log } from "../models/logs.model";
 import { News } from "../models/news.model";
+import { Order } from "sequelize";
 import { Record } from "../models/records.model";
 import { Request } from "express";
+import { Server } from "socket.io";
 import { Subject } from "../models/subject.model";
 import { Team } from "../models/teams.model";
 import { Timetable } from "../models/timetable.model";
 import { User } from "../models/user.model";
 import { UserComment } from "../models/user-comments.model";
 import { UserFavorite } from "../models/user-favorites.model";
+import { UserNotification } from "../models/user-notifications.model";
 import { UserReaction } from "../models/user-reactions.model";
 import { UserSetting } from "../models/user-settings.model";
 import { UserTask } from "../models/user-tasks.model";
 import { UserTaskStatus } from './../models/user-tasks.model';
 import { UserView } from "../models/user-views.model";
-import em from './event-emmiter';
 import { extractPathFromUrl } from "../shared/utils/fixPathFiles";
 import fs from 'fs';
+import logService from "./log.service";
+import moment from "moment";
+import notificationService from "./notification.service";
 import path from 'path';
 import { sequelize } from "../db";
 
@@ -31,7 +37,8 @@ class RecordService {
     recordTable == 'News' ? News :
       recordTable == 'Homework' ? Homework :
         recordTable == 'Calendar' ? Calendar :
-          Team;
+          recordTable == 'UserTask' ? UserTask :
+            Team;
 
       const record = await Record.findOne({
         where: { recordTable, recordId },
@@ -90,9 +97,12 @@ class RecordService {
             'meWorked' ]
           ]
         },
+        order: [ [ { model: UserComment, as: 'comments' }, { model: UserComment, as: 'children' }, 'createdAt', 'ASC' ] ],
         include: [
           {
-            model: Entity,
+            
+            ...(recordTable == 'UserTask' ? { model: UserTask, as: 'userTask' } : { model: Entity }),
+
             ...(recordTable == 'Homework' ? { include: [
               Subject
             ] } : {}),
@@ -106,6 +116,7 @@ class RecordService {
           {
             model: UserComment,
             required: false,
+            
             include: [
               {
                 model: Record,
@@ -134,6 +145,7 @@ class RecordService {
                 model: UserComment,
                 as: 'children',
                 required: false,
+                
                 include: [
                   {
                     model: Record,
@@ -182,6 +194,7 @@ class RecordService {
           },
           {
             model: UserTask,
+            as: 'userTasks',
             where: { userId },
             required: false
           }
@@ -208,6 +221,7 @@ class RecordService {
           {
             model: UserTask,
             required: false,
+            as: 'userTasks',
             include: [
               { model: User, include: [ UserSetting ] }
             ]
@@ -357,7 +371,10 @@ class RecordService {
     subjectId?: number,
     label?: string,
     favorites?: string,
+    deadlineDateSort?: string,
+    publishDateSort?: string,
   ){
+    
     const Entity =
     recordTable == 'News' ? News :
       recordTable == 'Homework' ? Homework :
@@ -373,6 +390,7 @@ class RecordService {
       },
       offset: offset,
       limit: limit,
+      ...(publishDateSort && publishDateSort !== 'none' ? { order: [ [ 'createdAt', publishDateSort ] ] } : {}),
       attributes: {
         include: [
           [ sequelize.literal(`(
@@ -499,15 +517,38 @@ class RecordService {
         },
       ]
     });
+
+    if(recordTable == 'Homework' && deadlineDateSort && deadlineDateSort !== 'none' ) {
+      records.rows.sort((a, b) => {
+        const deadlineA = moment(a.homework.endDate);
+        const deadlineB = moment(b.homework.endDate);
+        // Compare deadline dates
+        if (deadlineA.isBefore(moment(), 'day') && deadlineB.isBefore(moment(), 'day')) {
+          return 0; // If both are before today, maintain their current order
+        } else if (deadlineA.isBefore(moment(), 'day')) {
+          return 1; // If only a is before today, b should come first
+        } else if (deadlineB.isBefore(moment(), 'day')) {
+          return -1; // If only b is before today, a should come first
+        } else {
+          return deadlineDateSort === 'ASC' ? deadlineA.diff(deadlineB) : deadlineB.diff(deadlineA);
+        }
+      });
+    }
     
     return records;
   }
 
-  async react ( dto: {recordId: number; type: string; imageUrl: string}, userId: number) {
+  async react ( dto: {recordId: number; type: string; imageUrl: string}, userId: number, io: Server) {
     try {
+      const record = await Record.findByPk(dto.recordId);
+      if(!record) throw 'Record not found';
+
       const exitedReaction = await UserReaction.findOne({ where: { userId, recordId: dto.recordId } });
       if(exitedReaction) {
         if(exitedReaction.type == dto.type) {
+          if(record.recordTable == 'UserComment') {
+            logService.usingAchievement('userReacted', userId, io, record.id, 'destroy');
+          }
           return await exitedReaction.destroy();
         }
         exitedReaction.type = dto.type;
@@ -515,12 +556,16 @@ class RecordService {
         return await exitedReaction.save();
         
       }
+      if(record.recordTable == 'UserComment') {
+        logService.usingAchievement('userReacted', userId, io, record.id, 'create');
+      }
       return await UserReaction.create({
         userId,
         type: dto.type,
         imageUrl: dto.imageUrl,
         recordId: dto.recordId
       }, { returning: true });
+      
     }
     catch (err) {
       console.log(err);
@@ -567,9 +612,9 @@ class RecordService {
     }
   }
    
-  async comment( req: Request , userId: number, groupId: number) {
+  async comment( req: Request , userId: number, groupId: number, io: Server) {
     try {
-      const dto = req.body as {recordId: string; content: string; parentId: string; isNote: '0' | '1'; title: string};
+      const dto = req.body as { replyToUserId: string; recordId: string; content: string; parentId: string; isNote: '0' | '1'; title: string};
       const files = req.files as unknown as { [fieldname: string]: Express.Multer.File[] }; // as {files: File[], cover: File[] but one}
       
       const comment = await UserComment.create({
@@ -580,10 +625,29 @@ class RecordService {
         isNote: Boolean(Number(dto.isNote)), //isNote like '0' | '1'
         title: dto.title,
         myRecordId: Number(dto.recordId), // Will overwritten after create
-        ...(dto.parentId != '-1' && !isNaN(Number(dto.parentId)) ? { parentId: Number(dto.parentId) } : {})
+        ...(dto.parentId != '-1' && !isNaN(Number(dto.parentId)) ? { parentId: Number(dto.parentId) } : {}),
+        ...(dto.replyToUserId != '-1' && !isNaN(Number(dto.replyToUserId)) ? { replyToUserId: Number(dto.replyToUserId) } : {})
 
       });
       if(!comment) throw 'Комментарий не создан';
+      logService.usingAchievement('userCommented', userId, io);
+      
+      if(comment.replyToUserId) {
+        /**Создаем уведомление для пользователя, которому ответили на комментарий */
+        const currentComment = await UserComment.findByPk(comment.id, { include: [ User ] });
+
+        if(currentComment && currentComment.userId !== comment.replyToUserId) {
+          // сами себе не создаем уведомление ^
+          await notificationService.createNote({
+            recordId: comment.recordId,
+            content: comment.content,
+            authorId: currentComment.user.id,
+            title: `Ответил(а) на Ваш комментарий`,
+            userId: comment.replyToUserId,
+          }, io);
+          
+        }
+      }
       const _record = await Record.findOne({ where: { recordTable: 'UserComment', recordId: comment.id } });
       if(_record && files && files['files'] && files['files'].length > 0) {
         await AppFiles.bulkCreate(files['files'].map(file => ({

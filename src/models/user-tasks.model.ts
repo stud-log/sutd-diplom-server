@@ -15,12 +15,14 @@ interface UserTaskAttrs {
   userId?: number;
   groupId?: number;
   recordId?: number;
-  status: UserTaskStatus;
+  status?: UserTaskStatus;
   title?: string;
   description?: string;
   trackedTime?: number;
   doneDate?: string;
-  myRecordId: number;
+  endDate?: string;
+  startDate?: string;
+  myRecordId?: number;
 }
 
 /**
@@ -60,14 +62,14 @@ export class UserTask extends Model<UserTask, UserTaskAttrs> {
     group: Group;
 
   @ForeignKey(() => Record)
-  @Column({ allowNull: false })
+  @Column({ allowNull: true })
     myRecordId: number;
     
   @BelongsTo(() => Record, { as: 'myRecord', foreignKey: 'myRecordId' })
     myRecord: Record;
   
   @ForeignKey(() => Record)
-  @Column({ allowNull: false })
+  @Column({ allowNull: true })
     recordId: number;
     
   @BelongsTo(() => Record, { as: 'record', foreignKey: 'recordId' })
@@ -85,12 +87,16 @@ export class UserTask extends Model<UserTask, UserTaskAttrs> {
   @Column({ allowNull: true })
     trackedTime: number;
 
-  @Column({ allowNull: false })
+  @Column({ allowNull: false, defaultValue: UserTaskStatus.inProgress })
     status: string;
 
   /** Когда задачу выполнили */
   @Column({ allowNull: true })
     doneDate: string;
+
+  /**Начало  */
+  @Column({ allowNull: true })
+    startDate: string;
 
   /**Дедлайн  */
   @Column({ allowNull: true })

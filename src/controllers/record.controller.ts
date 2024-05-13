@@ -61,6 +61,8 @@ class RecordController {
           Number(req.query.subjectId),
           req.query.label as string,
           req.query.favorites as string,
+          req.query.deadlineDateSort as string,
+          req.query.publishDateSort as string,
         )
         .then(post => res.json(post))
         .catch(err => {
@@ -96,7 +98,7 @@ class RecordController {
     if(recordId) {
       if(!isNaN(Number(recordId))){
         return await recordService
-          .react(req.body, (req as IUserReq).user.id)
+          .react(req.body, (req as IUserReq).user.id, req.app.get('io'))
           .then(post => res.json(post))
           .catch(err => {
             return next(ApiError.badRequest(err));
@@ -136,7 +138,7 @@ class RecordController {
     if(recordId) {
       if(!isNaN(Number(recordId))){
         return await recordService
-          .comment(req, (req as IUserReq).user.id, (req as IUserReq).user.groupId)
+          .comment(req, (req as IUserReq).user.id, (req as IUserReq).user.groupId, req.app.get('io'))
           .then(post => res.json(post))
           .catch(err => {
             return next(ApiError.badRequest(err));
@@ -171,23 +173,14 @@ class RecordController {
    
   };
 
-  changeHomeworkStatus = async (req: Request, res: Response, next: NextFunction) => {
-    const { recordId } = req.body;
-    if(recordId) {
-      if(!isNaN(Number(recordId))){
-        return await taskService
-          .changeHomeworkStatus(req.body, (req as IUserReq).user.id, (req as IUserReq).user.groupId)
-          .then(post => res.json(post))
-          .catch(err => {
-            return next(ApiError.badRequest(err));
-          });
-      }
-      else {
-        return next(ApiError.badRequest('Params invalid'));
-      }
-    }
+  changeStatus = async (req: Request, res: Response, next: NextFunction) => {
     
-    return next(ApiError.badRequest('Params missing'));
+    return await taskService
+      .changeStatus(req.body, (req as IUserReq).user.id, (req as IUserReq).user.groupId)
+      .then(post => res.json(post))
+      .catch(err => {
+        return next(ApiError.badRequest(err));
+      });
    
   };
 

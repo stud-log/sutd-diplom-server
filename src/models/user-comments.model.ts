@@ -10,6 +10,7 @@ interface UserCommentAttrs {
   recordId: number;
   groupId: number;
   parentId?: number;
+  replyToUserId?: number;
   title?: string;
   content: string;
   isNote: boolean;
@@ -27,10 +28,14 @@ export class UserComment extends Model<UserComment, UserCommentAttrs> {
 
   @ForeignKey(() => User)
   @Column({ allowNull: false })
-    userId: number;
+    userId: number; // author of the comment
   
   @BelongsTo(() => User)
     user: User;
+
+  @ForeignKey(() => User)
+  @Column({ allowNull: true })
+    replyToUserId: number; // to which user we are replying
 
   @ForeignKey(() => Group)
   @Column({ allowNull: false })
@@ -54,7 +59,7 @@ export class UserComment extends Model<UserComment, UserCommentAttrs> {
     record: Record;
 
   @Column({ allowNull: true })
-    parentId: number;
+    parentId: number; // parent comment. DOES NOT MEANT THAT WE REPLY TO PARENT.user ; wee can constraint maximum levels of comments using this separation
 
   @BelongsTo(() => UserComment, {
     as: 'parent',

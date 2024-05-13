@@ -3,6 +3,8 @@ import { body, param } from "express-validator";
 import { Router } from "express";
 import { adminMiddleware } from "../middleware/admin.middleware";
 import { authMiddleware } from "../middleware/auth.middleware";
+import { checkUploadPath } from "../middleware/check-upload-path.middleware";
+import { uploadFiles } from "../middleware/upload-many-files.middleware";
 import userController from "../controllers/user.controller";
 import { validateRequestMiddleware } from "../middleware/validate-request.middleware";
 
@@ -14,6 +16,12 @@ userRouter.get('/me', authMiddleware(), userController.getMe);
 userRouter.get('/checkGuide', authMiddleware(), userController.isGuideSeen);
 userRouter.get('/myTasks', authMiddleware(), userController.myTasks);
 userRouter.get('/getTask', authMiddleware(), userController.getTask);
+userRouter.get('/notifications', authMiddleware(), userController.notifications);
+userRouter.get('/notifications/checkUnSeen', authMiddleware(), userController.checkUnSeen);
+userRouter.get('/notifications/markAsSeen', authMiddleware(), userController.markAsSeen);
+userRouter.get('/achievements/checkUnSeen', authMiddleware(), userController.checkUnSeenAchievements);
+userRouter.get('/achievements/markAsSeen', authMiddleware(), userController.markAsSeenAchievements);
+userRouter.get('/statistic/hw', authMiddleware(), userController.hwStats);
 
 userRouter.get(
   '/:id',
@@ -63,5 +71,7 @@ userRouter.post(
 userRouter.post('/update', authMiddleware(), userController.update);
 userRouter.post('/manage', authMiddleware({ canInvite: true }), userController.manageAccount);
 userRouter.post('/seenGuideline', authMiddleware(), userController.seenGuideLine);
+
+userRouter.post('/notifications/updateOrCreate', authMiddleware(), checkUploadPath('tasks'), uploadFiles([ 'files' ], 'tasks', 20), userController.updateOrCreateNotification);
 
 export { userRouter };
