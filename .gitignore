@@ -17,3 +17,5 @@ src/static/**/*.csv
 
 !src/static/_defaults/**/*
 !src/static/mail/*
+
+log.txt

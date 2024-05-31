@@ -12,7 +12,7 @@ interface UserFavoriteAttrs {
 @Table({ tableName: 'UserFavorites' })
 export class UserFavorite extends Model<UserFavorite, UserFavoriteAttrs> {
   @Column({ primaryKey: true, allowNull: false, autoIncrement: true, unique: true })
-    id: number;
+  declare id: number;
 
   @ForeignKey(() => User)
   @Column({ allowNull: false })

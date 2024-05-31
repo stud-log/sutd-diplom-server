@@ -34,7 +34,7 @@ interface LogAttrs {
 @Table({ tableName: 'Logs' })
 export class Log extends Model<Log, LogAttrs> {
   @Column({ primaryKey: true, allowNull: false, autoIncrement: true, unique: true })
-    id: number;
+  declare id: number;
 
   @ForeignKey(() => Record)
   @Column({ allowNull: true })

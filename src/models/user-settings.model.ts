@@ -12,7 +12,7 @@ interface UserSettingAttrs {
 @Table({ tableName: 'UserSettings' })
 export class UserSetting extends Model<UserSetting, UserSettingAttrs> {
   @Column({ primaryKey: true, allowNull: false, autoIncrement: true, unique: true })
-    id: number;
+  declare id: number;
 
   @ForeignKey(() => User)
   @Column({ allowNull: false })

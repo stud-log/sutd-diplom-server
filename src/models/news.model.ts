@@ -17,7 +17,7 @@ interface NewsAttrs {
 @Table({ tableName: 'News' })
 export class News extends Model<News, NewsAttrs> {
   @Column({ primaryKey: true, allowNull: false, autoIncrement: true, unique: true })
-    id: number;
+  declare id: number;
 
   @ForeignKey(() => Group)
   @Column({ allowNull: false })

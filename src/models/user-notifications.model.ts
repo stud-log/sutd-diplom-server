@@ -20,7 +20,7 @@ export interface UserNotificationAttrs {
 @Table({ tableName: 'UserNotifications' })
 export class UserNotification extends Model<UserNotification, UserNotificationAttrs> {
   @Column({ primaryKey: true, allowNull: false, autoIncrement: true, unique: true })
-    id: number;
+  declare id: number;
 
   @ForeignKey(() => User)
   @Column({ allowNull: false })

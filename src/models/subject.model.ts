@@ -10,7 +10,7 @@ interface SubjectAttrs {
 @Table({ tableName: 'Subjects', createdAt: false, updatedAt: false })
 export class Subject extends Model<Subject, SubjectAttrs> {
   @Column({ primaryKey: true, allowNull: false, autoIncrement: true, unique: true })
-    id: number;
+  declare id: number;
 
   @Column({ allowNull: false })
     title: string;

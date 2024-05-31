@@ -12,7 +12,7 @@ interface UserViewAttrs {
 @Table({ tableName: 'UserViews' })
 export class UserView extends Model<UserView, UserViewAttrs> {
   @Column({ primaryKey: true, allowNull: false, autoIncrement: true, unique: true })
-    id: number;
+  declare id: number;
 
   @ForeignKey(() => User)
   @Column({ allowNull: false })

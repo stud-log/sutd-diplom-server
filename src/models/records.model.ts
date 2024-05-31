@@ -21,7 +21,7 @@ interface RecordAttrs {
 @Table({ tableName: 'Records' })
 export class Record extends Model<Record, RecordAttrs> {
   @Column({ primaryKey: true, allowNull: false, autoIncrement: true, unique: true })
-    id: number;
+  declare id: number;
 
   /**
    * Needed for easy identifying group the records relates to

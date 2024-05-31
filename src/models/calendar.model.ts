@@ -23,7 +23,7 @@ interface CalendarAttrs {
 @Table({ tableName: 'Calendars', createdAt: false, updatedAt: false })
 export class Calendar extends Model<Calendar, CalendarAttrs> {
   @Column({ primaryKey: true, allowNull: false, autoIncrement: true, unique: true })
-    id: number;
+  declare id: number;
 
   @ForeignKey(() => Record)
   @Column({ allowNull: true })

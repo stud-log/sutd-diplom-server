@@ -21,7 +21,7 @@ interface IAdmin {
 @Table({ tableName: 'admins' })
 export class Admin extends Model<Admin, IAdmin> {
   @Column({ primaryKey: true, unique: true, allowNull: false, autoIncrement: true })
-    id: number;
+  declare id: number;
 
   @Column({ allowNull: true })
     fio: string;

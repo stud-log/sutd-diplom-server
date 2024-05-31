@@ -17,7 +17,7 @@ interface CustomActivityAttrs {
 @Table({ tableName: 'CustomActivities' })
 export class CustomActivity extends Model<CustomActivity, CustomActivityAttrs> {
   @Column({ primaryKey: true, allowNull: false, autoIncrement: true, unique: true })
-    id: number;
+  declare id: number;
 
   @ForeignKey(() => User)
   @Column({ allowNull: false })

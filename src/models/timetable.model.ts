@@ -65,7 +65,7 @@ export const weekdayOrder = {
 @Table({ tableName: 'Timetables' })
 export class Timetable extends Model<Timetable, TimetableAttrs> {
   @Column({ primaryKey: true, allowNull: false, autoIncrement: true, unique: true })
-    id: number;
+  declare id: number;
 
   @ForeignKey(() => Group)
   @Column({ allowNull: false })

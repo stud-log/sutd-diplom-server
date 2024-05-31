@@ -14,7 +14,7 @@ interface UserReactionAttrs {
 @Table({ tableName: 'UserReactions' })
 export class UserReaction extends Model<UserReaction, UserReactionAttrs> {
   @Column({ primaryKey: true, allowNull: false, autoIncrement: true, unique: true })
-    id: number;
+  declare id: number;
 
   @ForeignKey(() => User)
   @Column({ allowNull: false })

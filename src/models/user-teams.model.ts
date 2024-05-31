@@ -16,7 +16,7 @@ interface UserTeamAttrs {
 @Table({ tableName: 'UserTeams' })
 export class UserTeam extends Model<UserTeam, UserTeamAttrs> {
   @Column({ primaryKey: true, allowNull: false, autoIncrement: true, unique: true })
-    id: number;
+  declare id: number;
 
   @ForeignKey(() => User)
   @Column({ allowNull: false })

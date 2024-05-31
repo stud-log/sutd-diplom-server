@@ -12,7 +12,7 @@ interface UserAchievementAttrs {
 @Table({ tableName: 'UserAchievements' })
 export class UserAchievement extends Model<UserAchievement, UserAchievementAttrs> {
   @Column({ primaryKey: true, allowNull: false, autoIncrement: true, unique: true })
-    id: number;
+  declare id: number;
 
   @ForeignKey(() => User)
   @Column({ allowNull: false })

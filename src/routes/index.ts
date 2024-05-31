@@ -7,6 +7,7 @@ import { scheduleRouter } from './schedule.router';
 import { subjectRouter } from './subject.router';
 import { uploadsRouter } from './uploads.router';
 import { userRouter } from './user.router';
+import { openaiRouter } from './openai.router';
 
 const router = Router();
 
@@ -18,5 +19,6 @@ router.use('/admin', adminRouter);
 router.use('/record', recordRouter);
 router.use('/uploads', uploadsRouter);
 router.use('/achievements', achievementRouter);
+router.use('/openai', openaiRouter);
 
 export { router };

@@ -18,7 +18,7 @@ interface RolePermissionAttrs {
 @Table({ tableName: 'RolePermissions' })
 export class RolePermission extends Model<RolePermission, RolePermissionAttrs> {
   @Column({ primaryKey: true, allowNull: false, autoIncrement: true, unique: true })
-    id: number;
+  declare id: number;
 
   @Column({ allowNull: false })
     canEdit: boolean;

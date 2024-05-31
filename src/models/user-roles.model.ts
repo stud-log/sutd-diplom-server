@@ -11,7 +11,7 @@ interface UserRoleAttrs {
 @Table({ tableName: 'UserRoles' })
 export class UserRole extends Model<UserRole, UserRoleAttrs> {
   @Column({ primaryKey: true, allowNull: false, autoIncrement: true, unique: true })
-    id: number;
+  declare id: number;
 
   @Column({ allowNull: false })
     title: string;

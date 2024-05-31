@@ -26,7 +26,7 @@ interface HomeworkAttrs {
 @Table({ tableName: 'Homeworks' })
 export class Homework extends Model<Homework, HomeworkAttrs> {
   @Column({ primaryKey: true, allowNull: false, autoIncrement: true, unique: true })
-    id: number;
+  declare id: number;
 
   @ForeignKey(() => Record)
   @Column({ allowNull: true })

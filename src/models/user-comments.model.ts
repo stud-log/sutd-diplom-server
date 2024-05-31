@@ -24,7 +24,7 @@ interface UserCommentAttrs {
 @Table({ tableName: 'UserComments' })
 export class UserComment extends Model<UserComment, UserCommentAttrs> {
   @Column({ primaryKey: true, allowNull: false, autoIncrement: true, unique: true })
-    id: number;
+  declare id: number;
 
   @ForeignKey(() => User)
   @Column({ allowNull: false })

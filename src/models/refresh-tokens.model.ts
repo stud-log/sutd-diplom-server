@@ -11,7 +11,7 @@ interface RefreshTokenAttrs {
 @Table({ tableName: 'RefreshTokens', createdAt: false, updatedAt: false })
 export class RefreshToken extends Model<RefreshToken, RefreshTokenAttrs> {
   @Column({ primaryKey: true, allowNull: false, autoIncrement: true, unique: true })
-    id: number;
+  declare id: number;
 
   @ForeignKey(() => User)
   @Column({ allowNull: false })

@@ -16,7 +16,7 @@ interface FileAttrs {
 @Table({ tableName: 'Files' })
 export class AppFiles extends Model<AppFiles, FileAttrs> {
   @Column({ primaryKey: true, allowNull: false, autoIncrement: true, unique: true })
-    id: number;
+  declare id: number;
 
   @ForeignKey(() => Record)
   @Column({ allowNull: false })

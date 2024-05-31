@@ -12,7 +12,7 @@ interface TemporaryLinkAttrs {
 @Table({ tableName: 'TemporaryLinks' })
 export class TemporaryLink extends Model<TemporaryLink, TemporaryLinkAttrs> {
   @Column({ primaryKey: true, allowNull: false, autoIncrement: true, unique: true })
-    id: number;
+  declare id: number;
 
   @Column({ allowNull: false })
     hash: string;

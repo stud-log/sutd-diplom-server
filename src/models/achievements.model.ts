@@ -14,7 +14,7 @@ export interface AchievementAttrs {
 @Table({ tableName: 'Achievements' })
 export class Achievement extends Model<Achievement, AchievementAttrs> {
   @Column({ primaryKey: true, allowNull: false, autoIncrement: true, unique: true })
-    id: number;
+  declare id: number;
 
   @Column({ allowNull: false })
     title: string;

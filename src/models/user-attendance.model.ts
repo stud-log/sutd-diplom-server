@@ -14,7 +14,7 @@ interface UserAttendanceAttrs {
 @Table({ tableName: 'UserAttendances' })
 export class UserAttendance extends Model<UserAttendance, UserAttendanceAttrs> {
   @Column({ primaryKey: true, allowNull: false, autoIncrement: true, unique: true })
-    id: number;
+  declare id: number;
 
   @ForeignKey(() => Group)
   @Column({ allowNull: false })

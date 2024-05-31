@@ -45,7 +45,7 @@ interface UserTaskAttrs {
 @Table({ tableName: 'UserTasks' })
 export class UserTask extends Model<UserTask, UserTaskAttrs> {
   @Column({ primaryKey: true, allowNull: false, autoIncrement: true, unique: true })
-    id: number;
+  declare id: number;
 
   @ForeignKey(() => User)
   @Column({ allowNull: true })
