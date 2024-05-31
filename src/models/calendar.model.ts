@@ -11,6 +11,7 @@ export enum CalendarActivityType {
 interface CalendarAttrs {
   id?: number;
   activityId: number;
+  groupId: number;
   activityType: CalendarActivityType;
   startDate: string;
   endDate: string;

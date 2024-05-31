@@ -12,6 +12,7 @@ interface CustomActivityAttrs {
   description?: string;
   startDate: string;
   endDate: string;
+  isPersonal?: boolean;
 }
 
 @Table({ tableName: 'CustomActivities' })
@@ -45,10 +46,14 @@ export class CustomActivity extends Model<CustomActivity, CustomActivityAttrs> {
   @Column({ allowNull: false })
     endDate: string;
 
+  @Column({ allowNull: false, defaultValue: false })
+    isPersonal: boolean;
+
   @AfterCreate({})
   static async createCalendar(instance: CustomActivity) {
     await Calendar.create({
       activityId: instance.id,
+      groupId: instance.groupId,
       activityType: CalendarActivityType.custom,
       startDate: instance.startDate,
       endDate: instance.endDate
