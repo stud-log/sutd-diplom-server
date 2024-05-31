@@ -109,6 +109,15 @@ class ScheduleController {
     }
    
   };
+
+  updateOrCreateCustomActivity = async (req: Request, res: Response, next: NextFunction) => {
+    
+    return await scheduleService
+      .updateOrCreateCustomActivity(req)
+      .then(resp => res.json(resp))
+      .catch(err => next(ApiError.badFormData(err)));
+    
+  };
 }
 
 export default new ScheduleController();

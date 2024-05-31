@@ -6,7 +6,18 @@ import { Record } from "../models/records.model";
 import { Subject } from "../models/subject.model";
 import moment from "moment";
 import { sequelize } from "../db";
+import { Request } from 'express';
 import timetableService from "./timetable.service";
+import { IUserReq } from "../shared/interfaces/req";
+import { CustomActivity } from "../models/custom-activities.model";
+import { AppFiles } from "../models/files.model";
+import path from "path";
+import fs from 'fs';
+import { extractPathFromUrl } from "../shared/utils/fixPathFiles";
+import { UserComment } from "../models/user-comments.model";
+import { UserReaction } from "../models/user-reactions.model";
+import { User } from "../models/user.model";
+import { UserSetting } from "../models/user-settings.model";
 
 class ScheduleService {
   /**
@@ -239,6 +250,7 @@ class ScheduleService {
             ],
           },
         },
+        
       ],
       
     });
@@ -312,6 +324,77 @@ class ScheduleService {
             ],
           },
         },
+        {
+          model: UserComment,
+          required: false,
+          
+          include: [
+            {
+              model: Record,
+              as: 'myRecord',
+              include: [
+                {
+                  model: UserReaction,
+                  required: false
+                },
+                {
+                  model: AppFiles,
+                  required: false
+                }
+              ],
+            },
+            {
+              model: User,
+              include: [
+                {
+                  model: UserSetting,
+                  required: false
+                }
+              ]
+            },
+            {
+              model: UserComment,
+              as: 'children',
+              required: false,
+              
+              include: [
+                {
+                  model: Record,
+                  as: 'myRecord',
+                 
+                  include: [
+                    {
+                      model: UserReaction,
+                      required: false
+                    },
+                    {
+                      model: AppFiles,
+                      required: false
+                    }
+                  ],
+                },
+                {
+                  model: User,
+                  include: [
+                    {
+                      model: UserSetting,
+                      required: false
+                    }
+                  ]
+                },
+              ]
+            }
+          
+          ]
+        },
+        {
+          model: UserReaction,
+          required: false
+        },
+        {
+          model: AppFiles,
+          required: false
+        },
       ]
     });
   }
@@ -337,6 +420,99 @@ class ScheduleService {
     });
   }
   
+  async updateOrCreateCustomActivity(req: Request) {
+    /**
+     taskId - id of this entity
+     recordId - id of the Record referred to Calendar referred to CustomActivity
+     */
+    try {
+      const dto = req.body as {
+        title: string;
+        description: string;
+        recordId: string;
+        startDate: string;
+        endDate: string;
+        activityId: string;
+        isPersonal: '0' | '1';
+        filesToDelete: string; // stringified array of numbers
+      };
+      const files = req.files as unknown as { [fieldname: string]: Express.Multer.File[] }; // as {files: File[], cover: File[] but one}
+      const author = (req as IUserReq).user;
+
+      const calendarEvent = await Calendar.findOne({ where: { activityId: dto.activityId } });
+      if(calendarEvent) {
+        // Means that we are updating
+        const record = await Record.findOne({ where: { recordTable: 'Calendar', recordId: calendarEvent.id } }) as Record;
+
+        const activity = await CustomActivity.findByPk(dto.activityId);
+        if(!activity) throw 'Задача не найдена';
+        activity.title = dto.title;
+        activity.description = dto.description;
+        activity.startDate = dto.startDate;
+        activity.endDate = dto.endDate;
+        await activity.save();
+        
+        //TODO: move to special function
+        const parsedFilesToDelete = JSON.parse(dto.filesToDelete) as number[];
+        if(parsedFilesToDelete && parsedFilesToDelete.length > 0) {
+          const filesToDelete = await AppFiles.findAll({ where: { id: parsedFilesToDelete } });
+          filesToDelete.forEach(file => {
+            const filePath = path.resolve(__dirname, '..', 'static', file.url.replace('\\', '')); //replace first '\' to avoid path resolving it from root
+            fs.unlink(filePath, console.log);
+            file.destroy();
+          });
+        }
+
+        if(files && files['files'] && files['files'].length > 0) {
+          await AppFiles.bulkCreate(files['files'].map(file => {
+            return ({
+              recordId: record.id,
+              fileName: file.originalname,
+              fileSize: file.size,
+              url: '/' + extractPathFromUrl(file.path)
+            });}));
+        }
+
+        return true;
+      
+      }
+      else {
+      // Means that we are creating
+        
+        const activity = await CustomActivity.create({
+          userId: author.id,
+          groupId: author.groupId,
+          title: dto.title,
+          description: dto.description,
+          startDate: dto.startDate,
+          endDate: dto.endDate,
+          isPersonal: dto.isPersonal == '1' ? true : false,
+        });
+
+        if(!activity) throw 'Задача не создана';
+      
+        const _record = await Record.findOne({ where: { recordTable: 'UserTask', recordId: activity.id } });
+        if(_record && files && files['files'] && files['files'].length > 0) {
+          await AppFiles.bulkCreate(files['files'].map(file => ({
+            recordId: _record.id,
+            fileName: file.originalname,
+            fileSize: file.size,
+            url: '/' + extractPathFromUrl(file.path)
+          })));
+        }
+
+        return true;
+      }
+    }
+    catch (e) {
+      console.log(e);
+      if(typeof e == 'string') {
+        throw e;
+      }
+      throw 'Непредвиденная ошибка';
+    }
+
+  }
 }
 
 export default new ScheduleService();
