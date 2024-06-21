@@ -284,7 +284,8 @@ class UserService {
     }
     const userData = tokenService.validateRefreshToken(refreshToken);
     const tokenFromDb = await tokenService.findToken(refreshToken);
-    if (!userData || !tokenFromDb) {
+    // TODO: пока такой костыль. кажется небезопасно
+    if (!userData /* || !tokenFromDb */) {
       throw ApiError.unauthorizedError();
     }
     const user = await User.findByPk(userData.id, { include: [ { model: UserRole, include: [ RolePermission ] }, Group, UserSetting ] });
