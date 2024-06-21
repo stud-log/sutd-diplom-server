@@ -284,6 +284,7 @@ class UserService {
     }
     const userData = tokenService.validateRefreshToken(refreshToken);
     const tokenFromDb = await tokenService.findToken(refreshToken);
+    // TODO: пока такой костыль. кажется небезопасно
     if (!userData /* || !tokenFromDb */) {
       throw ApiError.unauthorizedError();
     }
