@@ -173,6 +173,26 @@ class RecordController {
    
   };
 
+  remove = async (req: Request, res: Response, next: NextFunction) => {
+    const { recordId } = req.body;
+    if(recordId) {
+      if(!isNaN(Number(recordId))){
+        return await recordService
+          .remove(Number(recordId), (req as IUserReq).user.id)
+          .then(post => res.json(post))
+          .catch(err => {
+            return next(ApiError.badRequest(err));
+          });
+      }
+      else {
+        return next(ApiError.badRequest('Params invalid'));
+      }
+    }
+    
+    return next(ApiError.badRequest('Params missing'));
+   
+  };
+
   changeStatus = async (req: Request, res: Response, next: NextFunction) => {
     
     return await taskService

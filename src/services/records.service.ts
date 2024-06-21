@@ -28,6 +28,7 @@ import moment from "moment";
 import notificationService from "./notification.service";
 import path from 'path';
 import { sequelize } from "../db";
+import { CustomActivity } from "../models/custom-activities.model";
 
 class RecordService {
 
@@ -315,13 +316,14 @@ class RecordService {
       // Means that we are creating post
         let post: News | Homework | null = null;
         if(recordTable == 'News') {
+          if(!files['cover'] || files['cover'].length == 0) throw 'Добавьте обложку';
           post = await News.create({
             authorId: author.id,
             groupId: author.groupId,
             title: dto.title,
             content: dto.content,
             label: dto.label,
-            coverImage: files['cover'].at(0)?.path ? '/' + extractPathFromUrl(files['cover'].at(0)!.path!) : '',
+            coverImage: files['cover'].at(0)!.path ? '/' + extractPathFromUrl(files['cover'].at(0)!.path!) : '',
           });
         }
         else {
@@ -599,6 +601,42 @@ class RecordService {
     catch (err) {
       console.log(err);
       throw 'Не удалось добавить просмотров';
+    }
+  }
+
+  async remove ( recordId: number , userId: number) {
+    try {
+      const toRemoveRecord = await Record.findByPk(recordId, { include: [ AppFiles ] });
+      if(toRemoveRecord) {
+        // delete files
+        // TODO: delete files from drive too
+        if(toRemoveRecord.files) {
+          await AppFiles.destroy({ where: { id: toRemoveRecord.files.map(f => f.id) } });
+        }
+
+        const recordTable = toRemoveRecord.recordTable;
+        const Entity =
+        recordTable == 'News' ? News :
+          recordTable == 'Homework' ? Homework :
+            recordTable == 'Calendar' ? Calendar :
+              recordTable == 'CustomActivity' ? CustomActivity :
+                recordTable == 'UserTask' ? UserTask :
+                  Team;
+        //@ts-expect-error "Model type"
+        await Entity.destroy({ where: { id: toRemoveRecord.recordId } });
+
+        if(Entity instanceof Homework) {
+          await UserTask.destroy({ where: { id: toRemoveRecord.id } });
+        }
+
+        await toRemoveRecord.destroy();
+      }
+
+      return true;
+    }
+    catch (err) {
+      console.log(err);
+      throw 'Не удалось удалить';
     }
   }
 

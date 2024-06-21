@@ -171,16 +171,39 @@ class ScheduleService {
   /**
    * If wholeTable is false (as default), then return only rows in this week
    */
-  async getSchedule (groupId: number, wholeTable = false) {
+  async getSchedule (groupId: number, userId: number, wholeTable = false, ) {
     const currentDayOfWeek = moment().day();
     
     const startDate = wholeTable ? null : moment().startOf('week').toDate();
-    const endDate = wholeTable ? null : moment().endOf('week').toDate();
+    const endDate = wholeTable ? null : moment().endOf('week').add(3, 'hour').toDate();
 
     return await Record.findAll({
       where: {
         recordTable: 'Calendar',
         groupId
+      },
+      attributes: {
+        include: [
+          [ sequelize.literal(`(
+            SELECT COALESCE(
+                json_agg(json_build_object(
+                    'id', "UserReactions"."id",
+                    'userId', "UserReactions"."userId",
+                    'recordId', "UserReactions"."recordId",
+                    'type', "UserReactions"."type",
+                    'imageUrl', "UserReactions"."imageUrl"
+                    -- Add more properties as needed
+                )),
+                '[]'::json
+            ) AS user_reactions
+            FROM 
+                "UserReactions" 
+            WHERE 
+                "recordId" = "Record"."id" AND 
+                "userId" = ${userId}
+        )`),
+          'meReacted' ],
+        ]
       },
       order: [ [ { model: Calendar, as: 'calendar' } , 'startDate', 'ASC' ] ],
       include: [
@@ -240,17 +263,21 @@ class ScheduleService {
                       
                   )),
                   '[]'::json
-              ) AS custom
+              ) AS customActivity
               FROM 
                   "CustomActivities" 
               WHERE 
                   "groupId" = "Record"."groupId" AND
                   "id" = "calendar"."activityId"
           )`), 'customActivity' ],
+              
             ],
           },
         },
-        
+        {
+          model: UserReaction,
+          required: false
+        },
       ],
       
     });
@@ -451,6 +478,10 @@ class ScheduleService {
         activity.startDate = dto.startDate;
         activity.endDate = dto.endDate;
         await activity.save();
+
+        calendarEvent.startDate = dto.startDate;
+        calendarEvent.endDate = dto.endDate;
+        await calendarEvent.save();
         
         //TODO: move to special function
         const parsedFilesToDelete = JSON.parse(dto.filesToDelete) as number[];

@@ -16,5 +16,6 @@ recordRouter.post('/post/react', authMiddleware(), recordController.react);
 recordRouter.post('/post/favorite', authMiddleware(), recordController.favorite);
 recordRouter.post('/post/comment', authMiddleware(), checkUploadPath('posts'), uploadFiles([ 'files' ], 'posts', 20), recordController.comment);
 recordRouter.post('/post/view', authMiddleware(), recordController.view);
+recordRouter.post('/post/remove', authMiddleware({ canEdit: true }), recordController.remove);
 
 export { recordRouter };

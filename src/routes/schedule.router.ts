@@ -7,7 +7,7 @@ import { uploadFiles } from "../middleware/upload-many-files.middleware";
 
 const scheduleRouter = Router();
 
-scheduleRouter.get('/:groupId', scheduleController.getSchedule);
+scheduleRouter.get('/:groupId', authMiddleware(), scheduleController.getSchedule);
 scheduleRouter.get('/one/:recordId', scheduleController.getScheduleElement);
 scheduleRouter.get('/timetable/:groupId', scheduleController.getGroupTimetable);
 
