@@ -54,22 +54,22 @@ export class Record extends Model<Record, RecordAttrs> {
   @HasOne(() => UserTask, { foreignKey: 'myRecordId' })
     userTask: UserTask;
 
-  @HasMany(() => UserComment, { foreignKey: 'recordId' })
+  @HasMany(() => UserComment, { foreignKey: 'recordId', onDelete: "CASCADE" })
     comments: UserComment[];
 
-  @HasMany(() => UserReaction)
+  @HasMany(() => UserReaction, { onDelete: "CASCADE" })
     reactions: UserReaction[];
 
-  @HasMany(() => UserFavorite)
+  @HasMany(() => UserFavorite, { onDelete: "CASCADE" })
     favorites: UserFavorite[];
 
-  @HasMany(() => AppFiles)
+  @HasMany(() => AppFiles, { onDelete: "SET NULL" })
     files: AppFiles[];
 
-  @HasMany(() => UserTask, { foreignKey: 'recordId' })
+  @HasMany(() => UserTask, { foreignKey: 'recordId', onDelete: "CASCADE" })
     userTasks: UserTask[];
 
-  @HasMany(() => UserView)
+  @HasMany(() => UserView, { onDelete: "CASCADE" })
     views: UserView[];
 
 }

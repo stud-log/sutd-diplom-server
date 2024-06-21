@@ -62,7 +62,7 @@ class ScheduleController {
     const { wholeTable } = req.query;
     if(!isNaN(Number(groupId))){
       return await scheduleService
-        .getSchedule(Number(groupId), Boolean(wholeTable))
+        .getSchedule(Number(groupId), (req as IUserReq).user.id, Boolean(wholeTable), )
         .then(resp => res.json(resp))
         .catch(err => {
           console.log(err);
