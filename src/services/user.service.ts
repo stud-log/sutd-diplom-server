@@ -9,7 +9,7 @@ import { Group } from '../models/group.model';
 import { Homework } from '../models/homeworks.model';
 import { Record } from '../models/records.model';
 import { RolePermission } from "../models/role-permissions.model";
-import { RoleService } from './role.service';
+import { RoleNames, RoleService } from './role.service';
 import { Subject } from '../models/subject.model';
 import { TemporaryLink } from '../models/tmp-links.model';
 import { UserAchievement } from '../models/user-achievements.model';
@@ -254,14 +254,26 @@ class UserService {
     
   }
 
-  async login(loginDto: LoginDTO) {
-    const user = await User.findOne({ where: { email: loginDto.email.trim().toLowerCase() }, include: [ { model: UserRole, include: [ RolePermission ] }, Group, UserSetting ] });
+  // TODO: include `role` in LoginDTO
+  async login(loginDto: LoginDTO & { role?: 'admin' | 'student' | 'teacher' }) {
+    const role = loginDto.role == 'admin' ?
+      await this.roleService.getAdminRole() :
+      loginDto.role == 'teacher' ?
+        await this.roleService.getTeacherRole():
+        await this.roleService.getStudentRoles();
+    
+    if(!role) throw "Такой роли не существует"; // must have not to be here
+
+    const user = await User.findOne({ where: {
+      email: loginDto.email.trim().toLowerCase(),
+      roleId: loginDto.role == 'student' ? (role as UserRole[]).map(r => r.id) : (role as UserRole).id
+    }, include: [ { model: UserRole, include: [ RolePermission ] }, Group, UserSetting ] });
 
     if (!user) throw 'Такой пользователь не зарегистрирован';
     const isPassEquals = await bcrypt.compare(loginDto.password, user.password);
     if (!isPassEquals) throw 'Неверный пароль';
 
-    if (user.status == UserStatus.inReview && user.role.title == 'Староста') throw 'Ваш аккаунт еще не подтвердили. Пожалуйста, свяжитесь с администрацией';
+    if (user.status == UserStatus.inReview && user.role.title == RoleNames.mentor) throw 'Ваш аккаунт еще не подтвердили. Пожалуйста, свяжитесь с администрацией';
     if (user.status == UserStatus.inReview) throw 'Ваш аккаунт еще не подтвердили. Пожалуйста, свяжитесь со старостой группы';
     if (user.status == UserStatus.rejected) throw 'Ваш аккаунт был отклонен. Пожалуйста, свяжитесь со старостой группы';
     

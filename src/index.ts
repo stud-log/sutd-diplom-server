@@ -18,34 +18,14 @@ import { router } from './routes';
 import { sequelize } from './db';
 import { setupIOevents } from './shared/_defaults/soket.io.settings';
 import { updateOrCreate } from './shared/utils/updateOrCreate';
+import { corsSettings } from './shared/interfaces/constants';
+import { RoleNames } from './services/role.service';
 
 const app = express();
-const server = http.createServer(app); // Create an HTTP server
-const io = new Server(server, {
-  cors: {
-    origin: [
-      process.env.FRONTEND_URL as string,
-      'https://promo.studlog.ru',
-      '*'
-    ],
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    preflightContinue: false,
-    credentials: true,
-  }
-});
+const server = http.createServer(app);
+const io = new Server(server, { cors: corsSettings });
 
-app.use(
-  cors({
-    origin: [
-      process.env.FRONTEND_URL as string,
-      'https://promo.studlog.ru',
-      '*'
-    ],
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    preflightContinue: false,
-    credentials: true,
-  }),
-);
+app.use(cors(corsSettings));
 app.use(express.json());
 app.use(cookieParser());
 app.use('/static', express.static(path.resolve(__dirname , 'static')));
@@ -58,12 +38,25 @@ const PORT = process.env.PORT;
 setupIOevents(io);
 
 const createDefaultRecords = async () => {
-  /* Create default roles */
-  const [ studentRole ] = await UserRole.findOrCreate({ where: { title: "Студент" }, defaults: { title: "Студент" } });
+  /**
+   * Create default roles:
+   * 1. Student
+   * 2. Mentor - with permissions to CRUD news and homeworks in group
+   * 3. Teacher - with permissions to CRUD news and homeworks to many groups
+   * 4. Administrator - with access to admin.studlog.ru service and permissions to CRUD almost all information
+   */
+  
+  const [ studentRole ] = await UserRole.findOrCreate({ where: { title: RoleNames.student }, defaults: { title: RoleNames.student } });
   await RolePermission.findOrCreate({ where: { roleId: studentRole.id }, defaults: { roleId: studentRole.id, canEdit: false, canInvite: false } });
 
-  const [ mentorRole ] = await UserRole.findOrCreate({ where: { title: "Староста" }, defaults: { title: "Староста" } });
+  const [ mentorRole ] = await UserRole.findOrCreate({ where: { title: RoleNames.mentor }, defaults: { title: RoleNames.mentor } });
   await RolePermission.findOrCreate({ where: { roleId: mentorRole.id }, defaults: { roleId: mentorRole.id, canEdit: true, canInvite: true } });
+  
+  const [ teacherRole ] = await UserRole.findOrCreate({ where: { title: RoleNames.teacher }, defaults: { title: RoleNames.teacher } });
+  await RolePermission.findOrCreate({ where: { roleId: teacherRole.id }, defaults: { roleId: teacherRole.id, canEdit: true, aTeacher: true } });
+
+  const [ adminRole ] = await UserRole.findOrCreate({ where: { title: RoleNames.admin }, defaults: { title: RoleNames.admin } });
+  await RolePermission.findOrCreate({ where: { roleId: adminRole.id }, defaults: { roleId: adminRole.id, canEdit: true, anAdmin: true, canSendNewsToTeachers: true, canSendPostsToTeachers: true } });
 
   /** Create default achievements */
   
@@ -72,6 +65,7 @@ const createDefaultRecords = async () => {
   }));
 
   /** Create system account */
+
   const [ systemGroup ] = await Group.findOrCreate({ where: { name: "Stud.log" }, defaults: { name: "Stud.log" } });
   const systemAcc = await User.findOne({ where: { lastName: 'Stud.log' } });
   if(!systemAcc) {
