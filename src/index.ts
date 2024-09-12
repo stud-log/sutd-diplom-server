@@ -58,6 +58,9 @@ const createDefaultRecords = async () => {
   const [ adminRole ] = await UserRole.findOrCreate({ where: { title: RoleNames.admin }, defaults: { title: RoleNames.admin } });
   await RolePermission.findOrCreate({ where: { roleId: adminRole.id }, defaults: { roleId: adminRole.id, canEdit: true, anAdmin: true, canSendNewsToTeachers: true, canSendPostsToTeachers: true } });
 
+  const [ superAdminRole ] = await UserRole.findOrCreate({ where: { title: RoleNames.superAdmin }, defaults: { title: RoleNames.superAdmin } });
+  await RolePermission.findOrCreate({ where: { roleId: superAdminRole.id }, defaults: { roleId: superAdminRole.id, canEdit: true, anAdmin: true, canSendNewsToTeachers: true, canSendPostsToTeachers: true, canManageUsers: true } });
+
   /** Create default achievements */
   
   await Promise.all(defaultAchievements.map(async (achievement) => {
@@ -77,10 +80,27 @@ const createDefaultRecords = async () => {
       email: 'studlog.help@yandex.ru',
       phone: '+79657514079',
       avatarUrl: '/_defaults/avatars/logo.svg',
-      password: '$2a$05$Wh6Bly22KM2UOckjakQ4W.F//fyS.kyaduyLrr9uRp2Y2ygc3InQK',
+      password: '$2y$05$kIA.9TpSju4.5lxJ5MVL1uQmUE6OcqX8.HqMU4nAzMrkqbRfZ2Po6', // same as fastpanel password
       status: UserStatus.approved
     });
   }
+
+  /** Create super admin account */
+
+  const adminAcc = await User.findOne({ where: { firstName: 'Администрация', lastName: 'Stud.log' } });
+  if(!adminAcc) {
+    await User.create({
+      firstName: "Администрация",
+      lastName: 'Stud.log',
+      roleId: superAdminRole.id,
+      email: 'studlog@admin.ru',
+      phone: '+79657514079',
+      avatarUrl: '/_defaults/avatars/logo.svg',
+      password: '$2y$05$kIA.9TpSju4.5lxJ5MVL1uQmUE6OcqX8.HqMU4nAzMrkqbRfZ2Po6', // same as fastpanel password
+      status: UserStatus.approved
+    });
+  }
+  
 };
 
 const start = async () => {

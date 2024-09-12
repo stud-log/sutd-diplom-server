@@ -256,17 +256,17 @@ class UserService {
 
   // TODO: include `role` in LoginDTO
   async login(loginDto: LoginDTO & { role?: 'admin' | 'student' | 'teacher' }) {
-    const role = loginDto.role == 'admin' ?
-      await this.roleService.getAdminRole() :
+    const roles = loginDto.role == 'admin' ?
+      await this.roleService.getAdminRoles() :
       loginDto.role == 'teacher' ?
-        await this.roleService.getTeacherRole():
+        await this.roleService.getTeacherRoles():
         await this.roleService.getStudentRoles();
     
-    if(!role) throw "Такой роли не существует"; // must have not to be here
+    if(!roles.length) throw "Такой роли не существует"; // must have not to be here
 
     const user = await User.findOne({ where: {
       email: loginDto.email.trim().toLowerCase(),
-      roleId: loginDto.role == 'student' ? (role as UserRole[]).map(r => r.id) : (role as UserRole).id
+      roleId: roles.map(r => r.id)
     }, include: [ { model: UserRole, include: [ RolePermission ] }, Group, UserSetting ] });
 
     if (!user) throw 'Такой пользователь не зарегистрирован';

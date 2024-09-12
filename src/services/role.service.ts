@@ -7,6 +7,7 @@ export enum RoleNames {
   mentor = 'Староста',
   teacher = 'Преподаватель',
   admin = 'Администратор',
+  superAdmin = 'Главный администратор',
 }
 
 export class RoleService {
@@ -15,11 +16,12 @@ export class RoleService {
     return await UserRole.findAll();
   }
 
-  /**
-   * Returns student role
-   */
   async getStudentRole() {
     return await UserRole.findOne({ where: { title: RoleNames.student }, include: [ RolePermission ] });
+  }
+
+  async getMentorRole() {
+    return await UserRole.findOne({ where: { title: RoleNames.mentor }, include: [ RolePermission ] });
   }
 
   /**
@@ -29,16 +31,30 @@ export class RoleService {
     return await UserRole.findAll({ where: { title: [ RoleNames.student, RoleNames.mentor ] }, include: [ RolePermission ] });
   }
 
-  async getMentorRole() {
-    return await UserRole.findOne({ where: { title: RoleNames.mentor }, include: [ RolePermission ] });
-  }
-
   async getTeacherRole() {
     return await UserRole.findOne({ where: { title: RoleNames.teacher }, include: [ RolePermission ] });
   }
 
+  /**
+   * Returns roles that corresponding to teachers: teachers
+   */
+  async getTeacherRoles() {
+    return await UserRole.findAll({ where: { title: [ RoleNames.teacher ] }, include: [ RolePermission ] });
+  }
+
   async getAdminRole() {
     return await UserRole.findOne({ where: { title: RoleNames.admin }, include: [ RolePermission ] });
+  }
+
+  async getSuperAdminRole() {
+    return await UserRole.findOne({ where: { title: RoleNames.superAdmin }, include: [ RolePermission ] });
+  }
+
+  /**
+   * Returns roles that corresponding to admins: admin and superAdmins
+   */
+  async getAdminRoles() {
+    return await UserRole.findAll({ where: { title: [ RoleNames.admin, RoleNames.superAdmin ] }, include: [ RolePermission ] });
   }
 
   async create(roleCreateDTO: RoleCreationDTO) {
