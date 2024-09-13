@@ -12,4 +12,7 @@ const adminRouter = Router();
 // TODO: Add admin middleware
 adminRouter.post('/setup', checkUploadPath('timetables'), uploadFile('table', 'timetables'), adminController.setup);
 
+//users
+adminRouter.post('/users', adminController.setup);
+
 export { adminRouter };

@@ -277,7 +277,12 @@ class UserService {
     if (user.status == UserStatus.inReview) throw 'Ваш аккаунт еще не подтвердили. Пожалуйста, свяжитесь со старостой группы';
     if (user.status == UserStatus.rejected) throw 'Ваш аккаунт был отклонен. Пожалуйста, свяжитесь со старостой группы';
     
-    const tokens = tokenService.generateTokens({ id: user.id, email: loginDto.email, groupId: user.groupId, permissions: { canEdit: user.role.permissions.canEdit, canInvite: user.role.permissions.canInvite } });
+    const tokens = tokenService.generateTokens({
+      id: user.id,
+      email: loginDto.email,
+      groupId: user.groupId,
+      permissions: user.role.permissions
+    });
 
     await tokenService.saveToken(user.id, tokens.refreshToken);
     
@@ -301,7 +306,12 @@ class UserService {
       throw ApiError.unauthorizedError();
     }
     const user = await User.findByPk(userData.id, { include: [ { model: UserRole, include: [ RolePermission ] }, Group, UserSetting ] });
-    const tokens = tokenService.generateTokens({ id: user!.id, email: user!.email, groupId: user!.groupId, permissions: { canEdit: user!.role.permissions.canEdit, canInvite: user!.role.permissions.canInvite } });
+    const tokens = tokenService.generateTokens({
+      id: user!.id,
+      email: user!.email,
+      groupId: user!.groupId,
+      permissions: user!.role.permissions
+    });
 
     await tokenService.saveToken(user!.id, tokens.refreshToken);
     return { ...tokens, user: user! };

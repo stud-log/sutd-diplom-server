@@ -2,8 +2,12 @@ import { BelongsTo, Column, DataType, ForeignKey, Model, Table } from 'sequelize
 
 import { UserRole } from './user-roles.model';
 
-interface RolePermissionAttrs {
+interface RolePermissionAttrs extends RolePermissions{
   id?: number;
+  roleId: number;
+}
+
+export interface RolePermissions {
   canEdit?: boolean;
   canInvite?: boolean;
   aTeacher?: boolean;
@@ -11,7 +15,6 @@ interface RolePermissionAttrs {
   canSendPostsToTeachers?: boolean;
   canSendNewsToTeachers?: boolean;
   canManageUsers?: boolean;
-  roleId: number;
 }
 
 @Table({ tableName: 'RolePermissions' })
