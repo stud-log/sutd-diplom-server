@@ -33,8 +33,9 @@ class AdminController {
         Number(req.query.page),
         Number(req.query.limit),
         req.query.roleIds as string,
-        req.query.groupdIds as string,
+        req.query.groupIds as string,
         req.query.fio as string,
+        req.query.sortmodel as string
       )
       .then(resp => res.json(resp))
       .catch(err => next(ApiError.badFormData(err)));
