@@ -4,20 +4,22 @@ import { useArrayFromStringParam, useSortModel } from "../../shared/utils/queryH
 
 class UserAdminService {
 
-  async getUsers (page: number, limit: number, roleIds?: string, groupIds?: string, fio?: string, sortmodel?: string) {
-    const offset = 0 + ((page - 1) * limit);
+  async getUsers (page: number, limit: number, roleIds?: string, groupIds?: string, searchByFio?: string, sortmodel?: string) {
+    const offset = Math.abs(0 + ((page - 1) * limit));
     const where: WhereOptions<User> = {};
     const order = useSortModel(sortmodel);
     useArrayFromStringParam<number>(roleIds, (roles) => where.roleId = roles);
     useArrayFromStringParam<number>(groupIds, (groups) => where.groupId = groups);
    
-    if(fio) {
+    if(searchByFio) {
       // @ts-expect-error unexisted key
       where[Op.or] = [
-        { firstName: { [Op.iLike]: `%${fio}%` } },
-        { lastName: { [Op.iLike]: `%${fio}%` } },
+        { firstName: { [Op.iLike]: `%${searchByFio}%` } },
+        { lastName: { [Op.iLike]: `%${searchByFio}%` } },
+        { patronymic: { [Op.iLike]: `%${searchByFio}%` } },
       ];
     }
+  
     return await User.findAndCountAll({
       offset,
       limit,

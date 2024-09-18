@@ -14,7 +14,10 @@ class AdminController {
     }
     try {
       const progressCallback = (progress: number, description: string) => {
-        if(progress !== 100) res.write(JSON.stringify({ progress, description })); // Send progress to client
+        if(progress !== 100) {
+          // TODO: resolve this problem
+          // res.write(JSON.stringify({ progress, description }));
+        } // Send progress to client
       };
   
       await setupService.setup(req.file, progressCallback);
@@ -34,7 +37,7 @@ class AdminController {
         Number(req.query.limit),
         req.query.roleIds as string,
         req.query.groupIds as string,
-        req.query.fio as string,
+        req.query.searchByFio as string,
         req.query.sortmodel as string
       )
       .then(resp => res.json(resp))
