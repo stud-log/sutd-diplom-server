@@ -91,6 +91,10 @@ class SetupService {
         if(errorsCount > 0) {
           return;
         }
+
+        console.log('Work with row:');
+        console.log(data);
+        
         const groupId = groups.find(aGroup => aGroup.name === data[3])?.id;
         const subjectId = subjects.find(aSubject => aSubject.title === data[5])?.id;
         const splittedTime = data[12].split('-');
