@@ -5,8 +5,9 @@ import { ApiError } from '../shared/error/ApiError';
 import { IUserReq } from '../shared/interfaces/req';
 import { RoleCreationDTO } from '@stud-log/news-types/dto';
 import { isEqual } from 'lodash';
+import { RolePermissions } from '../models/role-permissions.model';
 
-export const authMiddleware = (neededPermission?: Partial<RoleCreationDTO['permissions']>) => (req: Request, res: Response, next: NextFunction) => {
+export const authMiddleware = (neededPermission?: Partial<RolePermissions>) => (req: Request, res: Response, next: NextFunction) => {
   if (req.method === 'OPTIONS') {
     return next();
   }

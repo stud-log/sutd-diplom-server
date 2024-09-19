@@ -7,6 +7,7 @@ import { scheduleRouter } from './schedule.router';
 import { subjectRouter } from './subject.router';
 import { uploadsRouter } from './uploads.router';
 import { userRouter } from './user.router';
+import { authMiddleware } from '../middleware/auth.middleware';
 
 const router = Router();
 
@@ -14,7 +15,7 @@ router.use('/groups', groupRouter);
 router.use('/users', userRouter);
 router.use('/schedule', scheduleRouter);
 router.use('/subjects', subjectRouter);
-router.use('/admin', adminRouter);
+router.use('/admin', authMiddleware({ anAdmin: true }), adminRouter);
 router.use('/record', recordRouter);
 router.use('/uploads', uploadsRouter);
 router.use('/achievements', achievementRouter);

@@ -8,6 +8,9 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
+    "lib": [
+      "es2021"
+    ],
     "skipLibCheck": true,
     "strictPropertyInitialization": false,
     "experimentalDecorators": true,

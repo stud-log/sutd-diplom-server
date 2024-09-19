@@ -1,7 +1,7 @@
 import { TimetableWeekparities } from "../../models/timetable.model";
 
 export const converseWeekparity = (value: string) => {
-  switch (value.trim()) {
+  switch (value.trim().replaceAll(' ', '')) {
     case 'числ/знам':
       return TimetableWeekparities.both;
     case 'числ':

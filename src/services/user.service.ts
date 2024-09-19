@@ -9,7 +9,7 @@ import { Group } from '../models/group.model';
 import { Homework } from '../models/homeworks.model';
 import { Record } from '../models/records.model';
 import { RolePermission } from "../models/role-permissions.model";
-import { RoleService } from './role.service';
+import { RoleNames, RoleService } from './role.service';
 import { Subject } from '../models/subject.model';
 import { TemporaryLink } from '../models/tmp-links.model';
 import { UserAchievement } from '../models/user-achievements.model';
@@ -254,18 +254,35 @@ class UserService {
     
   }
 
-  async login(loginDto: LoginDTO) {
-    const user = await User.findOne({ where: { email: loginDto.email.trim().toLowerCase() }, include: [ { model: UserRole, include: [ RolePermission ] }, Group, UserSetting ] });
+  // TODO: include `role` in LoginDTO
+  async login(loginDto: LoginDTO & { role?: 'admin' | 'student' | 'teacher' }) {
+    const roles = loginDto.role == 'admin' ?
+      await this.roleService.getAdminRoles() :
+      loginDto.role == 'teacher' ?
+        await this.roleService.getTeacherRoles():
+        await this.roleService.getStudentRoles();
+    
+    if(!roles.length) throw "Такой роли не существует"; // must have not to be here
+
+    const user = await User.findOne({ where: {
+      email: loginDto.email.trim().toLowerCase(),
+      roleId: roles.map(r => r.id)
+    }, include: [ { model: UserRole, include: [ RolePermission ] }, Group, UserSetting ] });
 
     if (!user) throw 'Такой пользователь не зарегистрирован';
     const isPassEquals = await bcrypt.compare(loginDto.password, user.password);
     if (!isPassEquals) throw 'Неверный пароль';
 
-    if (user.status == UserStatus.inReview && user.role.title == 'Староста') throw 'Ваш аккаунт еще не подтвердили. Пожалуйста, свяжитесь с администрацией';
+    if (user.status == UserStatus.inReview && user.role.title == RoleNames.mentor) throw 'Ваш аккаунт еще не подтвердили. Пожалуйста, свяжитесь с администрацией';
     if (user.status == UserStatus.inReview) throw 'Ваш аккаунт еще не подтвердили. Пожалуйста, свяжитесь со старостой группы';
     if (user.status == UserStatus.rejected) throw 'Ваш аккаунт был отклонен. Пожалуйста, свяжитесь со старостой группы';
     
-    const tokens = tokenService.generateTokens({ id: user.id, email: loginDto.email, groupId: user.groupId, permissions: { canEdit: user.role.permissions.canEdit, canInvite: user.role.permissions.canInvite } });
+    const tokens = tokenService.generateTokens({
+      id: user.id,
+      email: loginDto.email,
+      groupId: user.groupId,
+      permissions: user.role.permissions
+    });
 
     await tokenService.saveToken(user.id, tokens.refreshToken);
     
@@ -289,7 +306,12 @@ class UserService {
       throw ApiError.unauthorizedError();
     }
     const user = await User.findByPk(userData.id, { include: [ { model: UserRole, include: [ RolePermission ] }, Group, UserSetting ] });
-    const tokens = tokenService.generateTokens({ id: user!.id, email: user!.email, groupId: user!.groupId, permissions: { canEdit: user!.role.permissions.canEdit, canInvite: user!.role.permissions.canInvite } });
+    const tokens = tokenService.generateTokens({
+      id: user!.id,
+      email: user!.email,
+      groupId: user!.groupId,
+      permissions: user!.role.permissions
+    });
 
     await tokenService.saveToken(user!.id, tokens.refreshToken);
     return { ...tokens, user: user! };
