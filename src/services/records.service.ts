@@ -316,14 +316,13 @@ class RecordService {
       // Means that we are creating post
         let post: News | Homework | null = null;
         if(recordTable == 'News') {
-          if(!files['cover'] || files['cover'].length == 0) throw 'Добавьте обложку';
           post = await News.create({
             authorId: author.id,
             groupId: author.groupId,
             title: dto.title,
             content: dto.content,
             label: dto.label,
-            coverImage: files['cover'].at(0)!.path ? '/' + extractPathFromUrl(files['cover'].at(0)!.path!) : '',
+            coverImage: (!files['cover'] || files['cover'].length == 0) ? null : files['cover'].at(0)!.path ? '/' + extractPathFromUrl(files['cover'].at(0)!.path!) : '',
           });
         }
         else {
@@ -390,6 +389,7 @@ class RecordService {
         recordTable,
         ...(groupId ? { groupId } : {})
       },
+      order: [ [ 'createdAt', 'DESC' ] ],
       offset: offset,
       limit: limit,
       ...(publishDateSort && publishDateSort !== 'none' ? { order: [ [ 'createdAt', publishDateSort ] ] } : {}),
