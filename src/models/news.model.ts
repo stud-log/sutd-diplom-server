@@ -11,7 +11,7 @@ interface NewsAttrs {
   title: string;
   content: string;
   label?: string;
-  coverImage?: string;
+  coverImage?: string | null;
 }
 
 @Table({ tableName: 'News' })
