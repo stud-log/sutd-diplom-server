@@ -15,8 +15,5 @@
     "strictPropertyInitialization": false,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true
-  },
-  "exclude": [
-    "webpack.config.ts"
-  ]
+  }
 }
