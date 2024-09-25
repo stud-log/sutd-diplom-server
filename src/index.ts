@@ -29,7 +29,8 @@ const io = new Server(server, { cors: corsSettings });
 app.use(cors(corsSettings));
 app.use(express.json());
 app.use(cookieParser());
-app.use('/static', express.static(path.resolve('./static')));
+// Change path because of production build runs from `dist` folder
+app.use('/static', express.static(path.resolve(__dirname , isDev ? 'static' : '../src/static')));
 app.set('io', io);
 app.use('/api', router);
 app.use(errorHandler);
