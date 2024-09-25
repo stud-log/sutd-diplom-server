@@ -256,7 +256,7 @@ class RecordService {
         endDate: string;
         filesToDelete: string; // stringified array of numbers
       };
-      const files = req.files as unknown as { [fieldname: string]: Express.Multer.File[] }; // as {files: File[], cover: File[] but one}
+      const files = req.files as unknown as { [fieldname: string]: Express.Multer.File[] }; // as {files: File[], cover: File[] - but one}
       const author = (req as IUserReq).user;
 
       const record = await Record.findOne({ where: { recordTable, recordId } });
