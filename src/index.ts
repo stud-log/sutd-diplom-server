@@ -21,6 +21,7 @@ import { updateOrCreate } from './shared/utils/updateOrCreate';
 import { corsSettings } from './shared/interfaces/constants';
 import { RoleNames } from './services/role.service';
 
+export const isDev = process.env.NODE_ENV === 'development';
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, { cors: corsSettings });
@@ -28,7 +29,7 @@ const io = new Server(server, { cors: corsSettings });
 app.use(cors(corsSettings));
 app.use(express.json());
 app.use(cookieParser());
-app.use('/static', express.static(path.resolve(__dirname , 'static')));
+app.use('/static', express.static(path.resolve('./static')));
 app.set('io', io);
 app.use('/api', router);
 app.use(errorHandler);
