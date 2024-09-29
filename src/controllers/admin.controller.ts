@@ -10,7 +10,7 @@ class AdminController {
    */
   setup = async (req: Request, res: Response, next: NextFunction) => {
     if(!req.file){
-      return ApiError.badFormData('File `table` is required');
+      return next(ApiError.badFormData('File `table` is required'));
     }
     try {
       const progressCallback = (progress: number, description: string) => {
@@ -39,6 +39,16 @@ class AdminController {
         req.query.groupIds as string,
         req.query.searchByFio as string,
         req.query.sortmodel as string
+      )
+      .then(resp => res.json(resp))
+      .catch(err => next(ApiError.badFormData(err)));
+  };
+
+  removeUser = async (req: Request, res: Response, next: NextFunction) => {
+    const { userId } = req.params;
+    return await adminService.userService
+      .removeUser(
+        Number(userId),
       )
       .then(resp => res.json(resp))
       .catch(err => next(ApiError.badFormData(err)));

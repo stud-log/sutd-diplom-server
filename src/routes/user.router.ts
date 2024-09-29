@@ -12,6 +12,7 @@ const userRouter = Router();
 
 userRouter.get('', adminMiddleware(), userController.getAll);
 userRouter.get('/refresh', userController.refresh);
+userRouter.get('/roles', userController.getRoles);
 userRouter.get('/me', authMiddleware(), userController.getMe);
 userRouter.get('/checkGuide', authMiddleware(), userController.isGuideSeen);
 userRouter.get('/myTasks', authMiddleware(), userController.myTasks);

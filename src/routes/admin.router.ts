@@ -11,7 +11,6 @@ const adminRouter = Router();
  * Setup app. Create all groups, subjects and timetables
  * __NOTE__: Table must be without headers! Only rows!
  */
-// TODO: Add admin middleware
 adminRouter.post('/setup', checkUploadPath('timetables'), uploadFile('table', 'timetables'), adminController.setup);
 
 //users
@@ -19,6 +18,11 @@ adminRouter.get('/users',
   query([ 'page', 'limit' ]).exists({ values: 'falsy' }),
   validateRequestMiddleware,
   adminController.getAllUsers
+);
+adminRouter.delete('/users/:userId',
+  param('id').exists({ checkFalsy: true }),
+  validateRequestMiddleware,
+  adminController.removeUser
 );
 
 export { adminRouter };

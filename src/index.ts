@@ -80,7 +80,7 @@ const createDefaultRecords = async () => {
       roleId: mentorRole.id,
       groupId: systemGroup.id,
       email: 'studlog.help@yandex.ru',
-      phone: '+79657514079',
+      phone: '79657514079',
       avatarUrl: '/_defaults/avatars/logo.svg',
       password: '$2y$05$kIA.9TpSju4.5lxJ5MVL1uQmUE6OcqX8.HqMU4nAzMrkqbRfZ2Po6', // same as fastpanel password
       status: UserStatus.approved
@@ -96,7 +96,7 @@ const createDefaultRecords = async () => {
       lastName: 'Stud.log',
       roleId: superAdminRole.id,
       email: 'studlog@admin.ru',
-      phone: '+79657514079',
+      phone: '79657514079',
       avatarUrl: '/_defaults/avatars/logo.svg',
       password: '$2y$05$kIA.9TpSju4.5lxJ5MVL1uQmUE6OcqX8.HqMU4nAzMrkqbRfZ2Po6', // same as fastpanel password
       status: UserStatus.approved

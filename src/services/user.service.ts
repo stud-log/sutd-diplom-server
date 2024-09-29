@@ -213,6 +213,10 @@ class UserService {
     return await User.findByPk(id, { include: [ { model: UserRole, include: [ RolePermission ] }, Group, UserSetting ] });
   }
 
+  async getRoles() {
+    return await UserRole.findAll({ include: [ RolePermission ] });
+  }
+
   async registration (regDto: RegDTO) {
     
     const isUserExist = await User.findOne({ where: { email: regDto.email } });
@@ -254,8 +258,7 @@ class UserService {
     
   }
 
-  // TODO: include `role` in LoginDTO
-  async login(loginDto: LoginDTO & { role?: 'admin' | 'student' | 'teacher' }) {
+  async login(loginDto: LoginDTO) {
     const roles = loginDto.role == 'admin' ?
       await this.roleService.getAdminRoles() :
       loginDto.role == 'teacher' ?

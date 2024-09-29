@@ -16,6 +16,7 @@ export enum UserStatus {
   inReview = 'inReview',
   approved = 'approved',
   rejected = 'rejected',
+  deleted = 'deleted'
 }
 
 interface UserAttrs {
@@ -25,7 +26,7 @@ interface UserAttrs {
   firstName: string;
   lastName: string;
   patronymic?: string; // отчество
-  nickname?: string; // отчество
+  nickname?: string | null;
   email: string;
   password: string;
   phone: string;
