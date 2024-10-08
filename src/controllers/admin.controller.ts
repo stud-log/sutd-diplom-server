@@ -3,6 +3,7 @@ import { NextFunction, Request, Response } from "express";
 import { ApiError } from "../shared/error/ApiError";
 import setupService from "../services/setup.service";
 import adminService from "../services/admin/admin.service";
+import { IUserReq } from "../shared/interfaces/req";
 
 class AdminController {
   /**
@@ -33,10 +34,12 @@ class AdminController {
   getAllUsers = async (req: Request, res: Response, next: NextFunction) => {
     return await adminService.userService
       .getUsers(
+        (req as IUserReq).user.id,
         Number(req.query.page),
         Number(req.query.limit),
         req.query.roleIds as string,
         req.query.groupIds as string,
+        req.query.statuses as string,
         req.query.searchByFio as string,
         req.query.sortmodel as string
       )
@@ -44,10 +47,27 @@ class AdminController {
       .catch(err => next(ApiError.badFormData(err)));
   };
 
+  async manageUser(req: Request, res: Response, next: NextFunction) {
+    return await adminService.userService
+      .createOrUpdateUser(req.body)
+      .then(resp => res.json(resp))
+      .catch(err => next(ApiError.badFormData(err)));
+  }
+
   removeUser = async (req: Request, res: Response, next: NextFunction) => {
     const { userId } = req.params;
     return await adminService.userService
       .removeUser(
+        Number(userId),
+      )
+      .then(resp => res.json(resp))
+      .catch(err => next(ApiError.badFormData(err)));
+  };
+
+  restoreUser = async (req: Request, res: Response, next: NextFunction) => {
+    const { userId } = req.params;
+    return await adminService.userService
+      .restoreUser(
         Number(userId),
       )
       .then(resp => res.json(resp))

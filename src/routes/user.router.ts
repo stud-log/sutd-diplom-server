@@ -10,7 +10,7 @@ import { validateRequestMiddleware } from "../middleware/validate-request.middle
 
 const userRouter = Router();
 
-userRouter.get('', adminMiddleware(), userController.getAll);
+userRouter.get('', authMiddleware({ anAdmin: true }), userController.getAll);
 userRouter.get('/refresh', userController.refresh);
 userRouter.get('/roles', userController.getRoles);
 userRouter.get('/me', authMiddleware(), userController.getMe);
@@ -28,7 +28,7 @@ userRouter.get(
   '/:id',
   param('id').exists({ checkFalsy: true }),
   validateRequestMiddleware,
-  adminMiddleware(),
+  authMiddleware({ anAdmin: true }),
   userController.getOne
 );
 

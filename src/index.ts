@@ -29,8 +29,6 @@ const PORT = process.env.PORT;
 
 setupIOevents(io);
 
-createDefaultRecords();
-
 const start = async () => {
   try {
     await sequelize.authenticate();

@@ -4,6 +4,7 @@ import { checkUploadPath } from "../middleware/check-upload-path.middleware";
 import { uploadFile } from "../middleware/upload-file.middleware";
 import { param, query } from "express-validator";
 import { validateRequestMiddleware } from "../middleware/validate-request.middleware";
+import { authMiddleware } from "../middleware/auth.middleware";
 
 const adminRouter = Router();
 
@@ -19,8 +20,12 @@ adminRouter.get('/users',
   validateRequestMiddleware,
   adminController.getAllUsers
 );
+
+adminRouter.post('/users', authMiddleware({ canManageUsers: true }), adminController.manageUser);
+adminRouter.post('/users/:userId/restore', authMiddleware({ canManageUsers: true }), adminController.restoreUser);
 adminRouter.delete('/users/:userId',
-  param('id').exists({ checkFalsy: true }),
+  authMiddleware({ canManageUsers: true }),
+  param('userId').exists({ checkFalsy: true }),
   validateRequestMiddleware,
   adminController.removeUser
 );
