@@ -30,7 +30,7 @@ export class Subject extends Model<Subject, SubjectAttrs> {
    * Аккаунт преподавателя
    */
   @ForeignKey(() => User)
-  @Column({ allowNull: true, type: DataType.NUMBER })
+  @Column({ allowNull: true, type: DataType.INTEGER })
     userId: number | null;
     
   @BelongsTo(() => User)
