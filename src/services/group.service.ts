@@ -18,6 +18,14 @@ class GroupService {
     return await Group.findOne({ where: { name } });
   }
 
+  async getTeachersGroup() {
+    return await Group.findOne({ where: { name: 'Преподаватели' } });
+  }
+
+  async getAdminsGroup() {
+    return await Group.findOne({ where: { name: 'Администрация' } });
+  }
+
   async groupUsers(groupId: number) {
     return await User.findAll({ where: { groupId, status: [ UserStatus.approved, UserStatus.inReview ] }, order: [ [ 'status', 'ASC' ] ], include: [ { model: UserSetting, required: false } ] });
   }

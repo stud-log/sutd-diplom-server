@@ -10,7 +10,7 @@ export enum RoleNames {
   superAdmin = 'Главный администратор',
 }
 
-export class RoleService {
+class RoleService {
 
   async getAll() {
     return await UserRole.findAll();
@@ -73,3 +73,5 @@ export class RoleService {
   }
 
 }
+
+export default new RoleService();

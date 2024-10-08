@@ -9,7 +9,7 @@ import { Group } from '../models/group.model';
 import { Homework } from '../models/homeworks.model';
 import { Record } from '../models/records.model';
 import { RolePermission } from "../models/role-permissions.model";
-import { RoleNames, RoleService } from './role.service';
+import roleService, { RoleNames } from './role.service';
 import { Subject } from '../models/subject.model';
 import { TemporaryLink } from '../models/tmp-links.model';
 import { UserAchievement } from '../models/user-achievements.model';
@@ -26,7 +26,6 @@ import recoveryService from './recovery.service';
 import tokenService from './token.service';
 
 class UserService {
-  private roleService = new RoleService();
 
   async getAll() {
     return await User.findAll();
@@ -210,18 +209,23 @@ class UserService {
   // TODO: why two similar methods??
   async getOne(id: number) {
     if(isNaN(id)) throw "Id must be number";
-    return await User.findByPk(id, { include: [ { model: UserRole, include: [ RolePermission ] }, Group, UserSetting ] });
+    return await User.findByPk(id, { include: [ { model: UserRole, include: [ RolePermission ] }, Group, UserSetting, Subject ] });
+  }
+
+  async getRoles() {
+    return await UserRole.findAll({ include: [ RolePermission ] });
   }
 
   async registration (regDto: RegDTO) {
     
     const isUserExist = await User.findOne({ where: { email: regDto.email } });
     if (isUserExist) {
+      if(isUserExist.status == UserStatus.deleted) throw 'Пользователь с таким E-mail зарегистрирован, но был удален. Свяжитесь с администрацией для восстановления доступа';
       throw `Такой пользователь уже зарегистрирован`;
     }
 
     const hashedPassword = await bcrypt.hash(regDto.password.trim(), 5);
-    const role = regDto.role == 'mentor' ? await this.roleService.getMentorRole() : await this.roleService.getStudentRole();
+    const role = regDto.role == 'mentor' ? await roleService.getMentorRole() : await roleService.getStudentRole();
     const group = await groupService.getByPK(regDto.groupId);
     
     if(!role) throw "Такой роли не существует"; // must have not to be here
@@ -238,7 +242,8 @@ class UserService {
         phone: regDto.phone,
         roleId: role.id,
         groupId: group.id,
-        avatarUrl: '/_defaults/avatars/1.svg'
+        avatarUrl: '/_defaults/avatars/1.svg',
+        createdFromAdminPanel: false
       },
       { returning: true, },
     );
@@ -254,13 +259,12 @@ class UserService {
     
   }
 
-  // TODO: include `role` in LoginDTO
-  async login(loginDto: LoginDTO & { role?: 'admin' | 'student' | 'teacher' }) {
+  async login(loginDto: LoginDTO) {
     const roles = loginDto.role == 'admin' ?
-      await this.roleService.getAdminRoles() :
+      await roleService.getAdminRoles() :
       loginDto.role == 'teacher' ?
-        await this.roleService.getTeacherRoles():
-        await this.roleService.getStudentRoles();
+        await roleService.getTeacherRoles():
+        await roleService.getStudentRoles();
     
     if(!roles.length) throw "Такой роли не существует"; // must have not to be here
 
@@ -272,7 +276,8 @@ class UserService {
     if (!user) throw 'Такой пользователь не зарегистрирован';
     const isPassEquals = await bcrypt.compare(loginDto.password, user.password);
     if (!isPassEquals) throw 'Неверный пароль';
-
+    
+    if (user.status == UserStatus.deleted) throw 'Этот аккаунт был удален. Пожалуйста, свяжитесь с администрацией';
     if (user.status == UserStatus.inReview && user.role.title == RoleNames.mentor) throw 'Ваш аккаунт еще не подтвердили. Пожалуйста, свяжитесь с администрацией';
     if (user.status == UserStatus.inReview) throw 'Ваш аккаунт еще не подтвердили. Пожалуйста, свяжитесь со старостой группы';
     if (user.status == UserStatus.rejected) throw 'Ваш аккаунт был отклонен. Пожалуйста, свяжитесь со старостой группы';

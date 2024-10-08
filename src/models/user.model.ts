@@ -11,11 +11,13 @@ import { UserRole } from './user-roles.model';
 import { UserSetting } from './user-settings.model';
 import { UserTask } from './user-tasks.model';
 import { UserTeam } from './user-teams.model';
+import { Subject } from './subject.model';
 
 export enum UserStatus {
   inReview = 'inReview',
   approved = 'approved',
   rejected = 'rejected',
+  deleted = 'deleted'
 }
 
 interface UserAttrs {
@@ -25,12 +27,13 @@ interface UserAttrs {
   firstName: string;
   lastName: string;
   patronymic?: string; // отчество
-  nickname?: string; // отчество
+  nickname?: string | null;
   email: string;
-  password: string;
-  phone: string;
+  password?: string;
+  phone?: string;
   status: UserStatus;
   avatarUrl?: string;
+  createdFromAdminPanel?: boolean;
 }
 
 @Table({ tableName: 'Users' })
@@ -76,6 +79,12 @@ export class User extends Model<User, UserAttrs> {
   @HasMany(() => UserAchievement)
     achievements: UserAchievement[];
 
+  /**
+   * If user is a Teacher
+   */
+  @HasMany(() => Subject)
+    subjects: Subject[];
+
   @HasMany(() => Log)
     logs: Log[];
 
@@ -94,10 +103,10 @@ export class User extends Model<User, UserAttrs> {
   @Column({ allowNull: false })
     email: string;
 
-  @Column({ allowNull: false })
+  @Column({ allowNull: true })
     password: string;
 
-  @Column({ allowNull: false })
+  @Column({ allowNull: true })
     phone: string;
 
   @Column({ type: DataType.TEXT, allowNull: true })
@@ -105,6 +114,9 @@ export class User extends Model<User, UserAttrs> {
 
   @Column({ values: Object.values(UserStatus), allowNull: false })
     status: string;
+
+  @Column({ allowNull: true, defaultValue: false })
+    createdFromAdminPanel: boolean;
   
   @AfterCreate({})
   static async createRecord(instance: User) {

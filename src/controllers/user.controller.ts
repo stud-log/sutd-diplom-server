@@ -45,6 +45,13 @@ class UserController {
       .catch(err => next(ApiError.badRequest(err)));
   };
 
+  getRoles = async (req: Request, res: Response, next: NextFunction) => {
+    return await userService
+      .getRoles()
+      .then(post => res.json(post))
+      .catch(err => next(ApiError.badRequest(err)));
+  };
+
   getOne = async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
     return await userService
