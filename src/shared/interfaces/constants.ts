@@ -7,6 +7,7 @@ export const corsSettings: CorsOptions | CorsOptionsDelegate = {
     'https://promo.studlog.ru',
     'https://test.studlog.ru',
     'https://admin.studlog.ru',
+    'http://localhost:4173',
     '*'
   ],
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
